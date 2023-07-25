@@ -1,15 +1,11 @@
 import tkinter as tk
-from tkinter import messagebox, ttk, Image, filedialog, StringVar
+from tkinter import messagebox, ttk, filedialog, StringVar
 import sqlite3
-import json
 import win32print
 import win32ui
-import subprocess
 from PIL import Image, ImageDraw, ImageFont
-import pandas
 import screeninfo
 import os
-import sqlite3
 from database_functions import delete_db, create_db, db_to_dict
 
 # Get the primary monitor information
