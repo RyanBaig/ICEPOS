@@ -20,7 +20,7 @@ height = screen_info.height
 window = tk.Tk()
 window.title("ICE AIRWAY BILL")
 window.geometry(f"{width}x{height}")
-window.iconbitmap("C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\icon.ico")
+window.iconbitmap("C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\media\\icons\\icon.ico")
 
 # Set the style for ttk widgets
 style = ttk.Style()
@@ -32,7 +32,7 @@ style.theme_use("clam")  # Options: "clam", "alt", "default", "classic"
 style.configure("TEntry", padding=5, font=("Arial", 14))
 
 # Customize the tttk.Button widget appearance
-style.configure("TButton", padding=8, font=("Arial", 12))
+style.configure("TButton", padding=2, font=("Arial", 12))
 
 # Customize the ttk.Combobox widget appearance
 style.configure("TCombobox", padding=5, font=("Arial", 14))
@@ -86,13 +86,13 @@ submission_canvas = tk.Canvas(submission_tab, width=1350, height=700)
 submission_canvas.pack()
 
 # Load the background image for the Submission tab
-background_image = tk.PhotoImage(file="C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\background.png")
+background_image = tk.PhotoImage(file="C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\media\\icons\\background.png")
 
 # Place the background image on the Canvas
 submission_canvas.create_image(0, 0, anchor=tk.NW, image=background_image)
 
 # Create the hamburger button using the PNG icon
-menu_icon = tk.PhotoImage(file="menu.png")
+menu_icon = tk.PhotoImage(file="C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\media\\icons\\menu.png")
 hamburger = tk.Button(submission_canvas, image=menu_icon, command=toggle_menu, bd=0)
 hamburger.place(x=10, y=10, anchor=tk.NW)  # Position the hamburger button in the top-left corner
 
@@ -229,7 +229,7 @@ def submit():
 def create_formatted_image(ship_name, ship_address, ship_desc, ship_dest, ship_serv, rec_name, rec_address, rec_zipcode,
                            ship_weight, ship_charges, no_of_pieces, date, ship_contact, rec_contact, serial_no):
     # Load the background image
-    background_img = Image.open("airway_bill_for_printing.png")
+    background_img = Image.open("media/icons/airway_bill_for_printing.png")
 
     # Create a drawing context
     draw = ImageDraw.Draw(background_img)
