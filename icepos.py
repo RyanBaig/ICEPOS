@@ -38,6 +38,18 @@ style.configure("TButton", padding=8, font=("Arial", 12))
 style.configure("TCombobox", padding=5, font=("Arial", 14))
 
 
+def toggle_menu():
+    if sidebar.winfo_x() < 0:  # Sidebar is hidden
+        sidebar.place(x=0)
+    else:  # Sidebar is visible
+        sidebar.place(x=-200)
+
+
+def close_menu():
+    if sidebar.winfo_x() >= 0:  # Sidebar is visible
+        sidebar.place(x=-200)
+
+
 def load_last_consign_key():
     try:
         with open("keys.pkl", "rb") as file:
@@ -78,6 +90,15 @@ background_image = tk.PhotoImage(file="C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\b
 
 # Place the background image on the Canvas
 submission_canvas.create_image(0, 0, anchor=tk.NW, image=background_image)
+
+# Create the hamburger button using the PNG icon
+menu_icon = tk.PhotoImage(file="menu.png")
+hamburger = tk.Button(submission_canvas, image=menu_icon, command=toggle_menu, bd=0)
+hamburger.place(x=10, y=10, anchor=tk.NW)  # Position the hamburger button in the top-left corner
+
+# Create the sidebar (hamburger menu content)
+sidebar = tk.Frame(window, bg="lightgray", width=200)
+sidebar.place(x=-200, y=0, relheight=1, anchor=tk.NW)
 
 # Shipper name (1)
 entry_ship_name = ttk.Entry(submission_tab, width=55, font=("Arial", 14), style="TEntry")
@@ -190,31 +211,17 @@ def submit():
                     weight,
                     charges,
                     no_of_pieces,
-                    date
-                ) VALUES (
-                    '{ship_name}',
-                    '{ship_address}',
-                    '{ship_contact}',
-                    '{ship_desc}',
-                    '{ship_dest}',
-                    '{ship_serv}',
-                    '{rec_name}',
-                    '{rec_address}',
-                    '{rec_contact}',
-                    '{rec_zipcode}',
-                    '{ship_weight}',
-                    '{ship_charges}',
-                    '{no_of_pieces}',
-                    '{date}'
-                );
-            """)
+                    date,
+                    consign_identifier
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+""", (ship_name, ship_address, ship_contact, ship_desc, ship_dest, ship_serv, rec_name, rec_address, rec_contact, rec_zipcode, ship_weight, ship_charges, no_of_pieces, date, generate_consign_key()))
 
             conn.commit()  # Commit the changes to the database
             # Refresh the dropdown and display the updated data in the Text widget
             refresh_dropdown_and_text()
             messagebox.showinfo("Data Submission", "Data Submitted Successfully")
     except Exception as e:
-        print("Error:", str(e))
+        print("Error in submit function:", str(e))
         pass
 
 
@@ -403,8 +410,8 @@ answers_tab = ttk.Frame(tab_control)
 tab_control.add(answers_tab, text='Answers')
 
 # Create a button to toggle fullscreen
-fullscreen_button = ttk.Button(window, text="Toggle Fullscreen", command=toggle_fullscreen)
-fullscreen_button.place(x=1210, y=10)
+fullscreen_button = ttk.Button(sidebar, text="Toggle Fullscreen", command=toggle_fullscreen)
+fullscreen_button.grid(row=0, column=0, padx=5, pady=5, sticky="w")
 
 # Create a button to reset all data
 reset_button = ttk.Button(submission_tab, text="Reset All Data", command=reset)
@@ -451,6 +458,9 @@ def update_dropdown_with_data():
 # Function to display the selected answer in the Text widget
 def display_selected_answer():
     try:
+        # Update the dropdown and text with latest data
+        refresh_dropdown_and_text()
+
         selected_value = selected_answer.get()
 
         # Fetch the selected answer data from the dropdown.rows dictionary
@@ -486,7 +496,6 @@ def refresh_dropdown_and_text():
         if not rows:
             return
 
-
         # Update the dropdown with valid shipper-receiver names
         valid_shipper_receiver_names = []
         ans_dict = {}
@@ -499,6 +508,7 @@ def refresh_dropdown_and_text():
                 valid_shipper_receiver_names.append(shipper_receiver_name)
                 ans_dict[shipper_receiver_name] = {
                     "Date": row[13],
+                    "Consignment Key": row[14],
                     "-----": "-----",
                     "Shipper Name": row[0],
                     "Shipper Address": row[1],
@@ -520,12 +530,10 @@ def refresh_dropdown_and_text():
         answer_dropdown["values"] = valid_shipper_receiver_names
         answer_dropdown.rows = ans_dict
 
-        # Display the selected answer in the text widget
-        display_selected_answer()
-
     except Exception as error:
         print(f"Error in refresh_dropdown_and_text: {str(error)}")
         pass
+
 
 
 # Create a button to display the selected answer
@@ -554,6 +562,10 @@ rows = cursor.fetchall()
 
 # Retrieve and display the initial data from the table in the Answers tab
 update_dropdown_with_data()
+
+# Add a close button to the sidebar
+close_button = ttk.Button(sidebar, text="Close", command=close_menu)
+close_button.grid(row=1, column=0, padx=5, pady=5, sticky="w")
 
 # Run the Tkinter event loop
 window.mainloop()

@@ -26,7 +26,7 @@ def create_db():
     charges TEXT,
     no_of_pieces INTEGER,
     date DATE,
-    PRIMARY KEY (shipper_name, receiver_name)
+    consign_identifier TEXT PRIMARY KEY
 );
     """
 
@@ -57,16 +57,17 @@ def db_to_dict(fields):
         key = f"{row[0]} - {row[6]}"
         ans[key] = {
             "date": row[13],
-            "------":"-----",
+            "consign_key": row[14],
+            "------": "-----",
             "shipper_name": row[0],
             "shipper_address": row[1],
             "shipper_contact": row[2],
-            "-----":"-----",
+            "-----": "-----",
             "receiver_name": row[6],
             "receiver_address": row[7],
             "rec_contact": row[8],
             "receiver_zipcode": row[9],
-            "-------":"-----",
+            "-------": "-----",
             "shipment_description": row[3],
             "shipment_destination": row[4],
             "shipment_service": row[5],
