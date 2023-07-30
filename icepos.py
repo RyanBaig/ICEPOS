@@ -1,12 +1,13 @@
 import tkinter as tk
-from tkinter import messagebox, ttk, filedialog, StringVar
+from tkinter import messagebox, ttk, StringVar
 import sqlite3
 import win32print
 import win32ui
 from PIL import Image, ImageDraw, ImageFont
 import screeninfo
 import os
-from database_functions import delete_db, create_db, db_to_dict
+from database_functions import *
+import pickle
 
 # Get the primary monitor information
 screen_info = screeninfo.get_monitors()[0]
@@ -17,9 +18,46 @@ height = screen_info.height
 
 # Create the Tkinter window and set size and icon
 window = tk.Tk()
-title = window.title("ICE AIRWAY BILL")
+window.title("ICE AIRWAY BILL")
 window.geometry(f"{width}x{height}")
-icon = window.iconbitmap("C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\icon.ico")
+window.iconbitmap("C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\icon.ico")
+
+# Set the style for ttk widgets
+style = ttk.Style()
+
+# Use a custom theme to create a more modern look
+style.theme_use("clam")  # Options: "clam", "alt", "default", "classic"
+
+# Customize the tttk.Entry widget appearance
+style.configure("TEntry", padding=5, font=("Arial", 14))
+
+# Customize the tttk.Button widget appearance
+style.configure("TButton", padding=8, font=("Arial", 12))
+
+# Customize the ttk.Combobox widget appearance
+style.configure("TCombobox", padding=5, font=("Arial", 14))
+
+
+def load_last_consign_key():
+    try:
+        with open("keys.pkl", "rb") as file:
+            last_key = pickle.load(file)
+    except EOFError:
+        last_key = 0
+    return last_key
+
+
+def save_last_consign_key(last_key):
+    with open("keys.pkl", "wb") as file:
+        pickle.dump(last_key, file)
+
+
+def generate_consign_key():
+    last_key = load_last_consign_key()
+    consign_key = f"ICE-SHIP-{last_key + 1:04}"  # Adjust the format as needed
+    save_last_consign_key(last_key + 1)
+    return consign_key
+
 
 # Create a Tab Control
 tab_control = ttk.Notebook(window)
@@ -41,49 +79,65 @@ background_image = tk.PhotoImage(file="C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\b
 # Place the background image on the Canvas
 submission_canvas.create_image(0, 0, anchor=tk.NW, image=background_image)
 
-# Shipper name
-entry_ship_name = tk.Entry(submission_tab, width=55, font=("Arial", 14))
-entry_ship_name.place(x=45, y=225)
+# Shipper name (1)
+entry_ship_name = ttk.Entry(submission_tab, width=55, font=("Arial", 14), style="TEntry")
+entry_ship_name.place(x=45, y=210)
 
-# Shipper Address
+# Shipper Address (2)
 entry_ship_address = tk.StringVar()
-entry_ship_address_entry = tk.Entry(submission_tab, width=55, font=("Arial", 14), textvariable=entry_ship_address)
-entry_ship_address_entry.place(x=45, y=330)
+entry_ship_address_entry = ttk.Entry(submission_tab, width=55, font=("Arial", 14), style="TEntry",
+                                     textvariable=entry_ship_address)
+entry_ship_address_entry.place(x=45, y=305)
 
-# Shipper Description
-entry_ship_desc = tk.Entry(submission_tab, width=55, font=("Arial", 14))
-entry_ship_desc.place(x=45, y=470)
+# Shipment Description (3)
+entry_ship_desc = ttk.Entry(submission_tab, width=55, font=("Arial", 14), style="TEntry")
+entry_ship_desc.place(x=45, y=395)
 
-# Shipment Destination
-entry_ship_dest = tk.Entry(submission_tab, width=28, font=("Arial", 14))
-entry_ship_dest.place(x=700, y=230)
+# Shipment Contact # (4)
+entry_ship_contact = ttk.Entry(submission_tab, width=24, font=("Arial", 14), style="TEntry")
+entry_ship_contact.place(x=45, y=490)
 
-# Shipment Service
-entry_ship_serv = tk.Entry(submission_tab, width=18, font=("Arial", 14))
-entry_ship_serv.place(x=1100, y=230)
+# Shipment Date (5)
+entry_date = ttk.Entry(submission_tab, width=23, font=("Arial", 14), style="TEntry")
+entry_date.place(x=697, y=180)
 
-# Receiver Name
-entry_rec_name = tk.Entry(submission_tab, width=55, font=("Arial", 14))
-entry_rec_name.place(x=700, y=340)
+# Shipment Destination (6)
+entry_ship_dest = ttk.Entry(submission_tab, width=28, font=("Arial", 14), style="TEntry")
+entry_ship_dest.place(x=700, y=270)
 
-# Receiver Address
+# Shipment Service (7)
+entry_ship_serv = ttk.Entry(submission_tab, width=18, font=("Arial", 14), style="TEntry")
+entry_ship_serv.place(x=1100, y=270)
+
+# Receiver Name (8)
+entry_rec_name = ttk.Entry(submission_tab, width=55, font=("Arial", 14), style="TEntry")
+entry_rec_name.place(x=700, y=375)
+
+# Receiver Address (9)
 entry_rec_address = tk.StringVar()
-entry_rec_address_entry = tk.Entry(submission_tab, width=55, font=("Arial", 14), textvariable=entry_rec_address)
+entry_rec_address_entry = ttk.Entry(submission_tab, width=55, font=("Arial", 14), style="TEntry",
+                                    textvariable=entry_rec_address)
 entry_rec_address_entry.place(x=700, y=470)
 
-# Receiver Zipcode
-entry_rec_zipcode = tk.Entry(submission_tab, width=20, font=("Arial", 14))
-entry_rec_zipcode.place(x=860, y=580)
+# Receiver Zipcode (10)
+entry_rec_zipcode = ttk.Entry(submission_tab, width=20, font=("Arial", 14), style="TEntry")
+entry_rec_zipcode.place(x=1052, y=580)
 
-# Shipment Weight
-entry_ship_weight = tk.StringVar()
-entry_ship_weight_entry = tk.Entry(submission_tab, width=16, font=("Arial", 14), textvariable=entry_ship_weight)
-entry_ship_weight_entry.place(x=68, y=580)
+# Shipment Weight (11)
+entry_ship_weight = ttk.Entry(submission_tab, width=14, font=("Arial", 14), style="TEntry")
+entry_ship_weight.place(x=45, y=595)
 
-# Shipment Charges
-entry_ship_charges = tk.StringVar()
-entry_ship_charges_entry = tk.Entry(submission_tab, width=15, font=("Arial", 14), textvariable=entry_ship_charges)
-entry_ship_charges_entry.place(x=430, y=580)
+# Shipment Charges (12)
+entry_ship_charges = ttk.Entry(submission_tab, width=15, font=("Arial", 14), style="TEntry")
+entry_ship_charges.place(x=470, y=595)
+
+# No. of Pieces (13)
+entry_no_of_pieces = ttk.Entry(submission_tab, width=13, font=("Arial", 14), style="TEntry")
+entry_no_of_pieces.place(x=260, y=595)
+
+# Consignee Contact (14)
+entry_rec_contact = ttk.Entry(submission_tab, width=20, font=("Arial", 14), style="TEntry")
+entry_rec_contact.place(x=725, y=577)
 
 # Create a connection to the SQLite database
 conn = sqlite3.connect('ice-answers.db')
@@ -109,31 +163,66 @@ def submit():
         rec_zipcode = entry_rec_zipcode.get()
         ship_weight = entry_ship_weight.get()
         ship_charges = entry_ship_charges.get()
+        no_of_pieces = entry_no_of_pieces.get()
+        date = entry_date.get()
+        ship_contact = entry_ship_contact.get()
+        rec_contact = entry_rec_contact.get()
 
         # Check if any field is empty
-        if any(value == '' for value in [ship_name, ship_address, ship_desc, ship_dest, ship_serv, rec_name, rec_address, rec_zipcode, ship_weight, ship_charges]):
+        if any(value == '' for value in
+               [ship_name, ship_address, ship_desc, ship_dest, ship_serv, rec_name, rec_address, rec_zipcode,
+                ship_weight, ship_charges, no_of_pieces, date, ship_contact, rec_contact]):
             messagebox.showerror("Error", "All fields are required!")
         else:
             # Insert the data into the database
-            cursor.execute('INSERT INTO answers (shipper_name, shipper_address, shipment_description, shipment_destination, shipment_service, receiver_name, receiver_address, receiver_zipcode, weight, charges) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                           (ship_name, ship_address, ship_desc, ship_dest, ship_serv, rec_name, rec_address, rec_zipcode, ship_weight, ship_charges))
-            conn.commit()  # Commit the changes to the database
+            cursor.execute(f"""
+                INSERT INTO answers (
+                    shipper_name,
+                    shipper_address,
+                    shipper_contact,
+                    shipment_description,
+                    shipment_destination,
+                    shipment_service,
+                    receiver_name,
+                    receiver_address,
+                    rec_contact,
+                    receiver_zipcode,
+                    weight,
+                    charges,
+                    no_of_pieces,
+                    date
+                ) VALUES (
+                    '{ship_name}',
+                    '{ship_address}',
+                    '{ship_contact}',
+                    '{ship_desc}',
+                    '{ship_dest}',
+                    '{ship_serv}',
+                    '{rec_name}',
+                    '{rec_address}',
+                    '{rec_contact}',
+                    '{rec_zipcode}',
+                    '{ship_weight}',
+                    '{ship_charges}',
+                    '{no_of_pieces}',
+                    '{date}'
+                );
+            """)
 
+            conn.commit()  # Commit the changes to the database
             # Refresh the dropdown and display the updated data in the Text widget
             refresh_dropdown_and_text()
-
             messagebox.showinfo("Data Submission", "Data Submitted Successfully")
     except Exception as e:
         print("Error:", str(e))
         pass
 
 
-
 # Function to create a formatted image
 def create_formatted_image(ship_name, ship_address, ship_desc, ship_dest, ship_serv, rec_name, rec_address, rec_zipcode,
-                           ship_weight, ship_charges):
+                           ship_weight, ship_charges, no_of_pieces, date, ship_contact, rec_contact, serial_no):
     # Load the background image
-    background_img = Image.open("background.png")
+    background_img = Image.open("airway_bill_for_printing.png")
 
     # Create a drawing context
     draw = ImageDraw.Draw(background_img)
@@ -143,16 +232,21 @@ def create_formatted_image(ship_name, ship_address, ship_desc, ship_dest, ship_s
 
     # Define the coordinates for placing text on the image
     coordinates = {
-        "ship_name": (45, 225),
-        "ship_address": (45, 330),
-        "ship_desc": (45, 470),
-        "ship_dest": (700, 230),
-        "ship_serv": (1100, 230),
-        "rec_name": (700, 340),
+        "ship_name": (45, 210),
+        "ship_address": (45, 305),
+        "ship_desc": (45, 395),
+        "ship_dest": (700, 270),
+        "ship_serv": (1100, 270),
+        "rec_name": (700, 375),
         "rec_address": (700, 470),
-        "rec_zipcode": (860, 580),
-        "ship_weight": (68, 580),
-        "ship_charges": (430, 580)
+        "rec_zipcode": (1052, 580),
+        "ship_weight": (45, 595),
+        "ship_charges": (470, 595),
+        "no_of_pieces": (252, 595),
+        "date": (697, 180),
+        "ship_contact": (45, 490),
+        "rec_contact": (725, 573),
+        "serial_no": (1100, 180)
     }
 
     # Draw the text on the image
@@ -166,6 +260,11 @@ def create_formatted_image(ship_name, ship_address, ship_desc, ship_dest, ship_s
     draw.text(coordinates["rec_zipcode"], f"{rec_zipcode}", fill=(0, 0, 0), font=font)
     draw.text(coordinates["ship_weight"], f"{ship_weight}", fill=(0, 0, 0), font=font)
     draw.text(coordinates["ship_charges"], f"{ship_charges}", fill=(0, 0, 0), font=font)
+    draw.text(coordinates["no_of_pieces"], f"{no_of_pieces}", fill=(0, 0, 0), font=font)
+    draw.text(coordinates["date"], f"{date}", fill=(0, 0, 0), font=font)
+    draw.text(coordinates["ship_contact"], f"{ship_contact}", fill=(0, 0, 0), font=font)
+    draw.text(coordinates["rec_contact"], f"{rec_contact}", fill=(0, 0, 0), font=font)
+    draw.text(coordinates["serial_no"], f"{generate_consign_key()}", fill=(0, 0, 0), font=font)
 
     # Save the formatted image
     background_img.save("formatted_image.png")
@@ -223,6 +322,7 @@ def print_image(image_path):
 
 
 def print_formatted_image():
+    # Fetch data from the input fields
     ship_name = entry_ship_name.get()
     ship_address = entry_ship_address.get()
     ship_desc = entry_ship_desc.get()
@@ -233,16 +333,23 @@ def print_formatted_image():
     rec_zipcode = entry_rec_zipcode.get()
     ship_weight = entry_ship_weight.get()
     ship_charges = entry_ship_charges.get()
+    no_of_pieces = entry_no_of_pieces.get()
+    date = entry_date.get()
+    ship_contact = entry_ship_contact.get()
+    rec_contact = entry_rec_contact.get()
 
     # Create a formatted image
     entries = [entry_ship_name, entry_ship_address, entry_ship_desc, entry_ship_dest, entry_ship_serv,
-               entry_rec_name, entry_rec_address, entry_rec_zipcode, entry_ship_weight, entry_ship_charges]
+               entry_rec_name, entry_rec_address, entry_rec_zipcode, entry_ship_weight, entry_ship_charges,
+               entry_no_of_pieces,
+               entry_date, entry_ship_contact, entry_rec_contact]
     values = [entry.get() for entry in entries]
     if any(value == '' for value in values):
         messagebox.showerror("Error", "All fields are required!")
     else:
         create_formatted_image(ship_name, ship_address, ship_desc, ship_dest, ship_serv, rec_name, rec_address,
-                               rec_zipcode, ship_weight, ship_charges)
+                               rec_zipcode, ship_weight, ship_charges, no_of_pieces, date, ship_contact, rec_contact,
+                               generate_consign_key())
 
         # Print the formatted image
         try:
@@ -252,14 +359,14 @@ def print_formatted_image():
 
 
 # Create Submit Button
-submit_button = tk.Button(submission_tab, text="Submit", fg="white", bg="black", width=10, height=1, font=("Arial", 12),
-                          command=lambda: [submit(), refresh_dropdown_and_text()])
+submit_button = ttk.Button(submission_tab, text="Submit", style="TButton", width=10,
+                           command=lambda: [submit(), refresh_dropdown_and_text()])
 submit_button.place(x=600, y=600)
 
 # Create Print Button
-print_button = tk.Button(submission_tab, text="Print", fg="white", bg="black", width=10, height=1, font=("Arial", 12),
-                         command=lambda: [print_formatted_image(), refresh_dropdown_and_text()])
-print_button.place(x=700, y=600)
+print_button = ttk.Button(submission_tab, text="Print", width=10, style="TButton",
+                          command=lambda: [print_formatted_image(), refresh_dropdown_and_text()])
+print_button.place(x=710, y=600)
 
 
 # Function to close the database connection
@@ -271,7 +378,7 @@ def close_connection():
 def toggle_fullscreen():
     if window.attributes('-fullscreen'):
         window.attributes('-fullscreen', False)
-    else:
+    elif not window.attributes('-fullscreen'):
         window.attributes('-fullscreen', True)
 
 
@@ -296,12 +403,12 @@ answers_tab = ttk.Frame(tab_control)
 tab_control.add(answers_tab, text='Answers')
 
 # Create a button to toggle fullscreen
-fullscreen_button = tk.Button(window, text="Toggle Fullscreen", command=toggle_fullscreen, fg="white", bg="black")
-fullscreen_button.place(x=1250, y=20)
+fullscreen_button = ttk.Button(window, text="Toggle Fullscreen", command=toggle_fullscreen)
+fullscreen_button.place(x=1210, y=10)
 
 # Create a button to reset all data
-fullscreen_button = tk.Button(submission_tab, text="Reset All Data", command=reset, fg="white", bg="black")
-fullscreen_button.place(x=650, y=656)
+reset_button = ttk.Button(submission_tab, text="Reset All Data", command=reset)
+reset_button.place(x=650, y=656)
 
 # Create a Text widget to display the answers in the Answers tab
 answers_text = tk.Text(answers_tab, width=80, height=20)
@@ -311,7 +418,8 @@ answers_text.configure(state="disabled")  # Set the state to "disabled"
 selected_answer = StringVar()
 
 # Create a Combobox for the dropdown
-answer_dropdown = ttk.Combobox(answers_tab, textvariable=selected_answer, width=30, state="readonly")
+answer_dropdown = ttk.Combobox(answers_tab, style="Custom.TCombobox", textvariable=selected_answer, width=30,
+                               state="readonly")
 answer_dropdown.pack()
 
 # Populate the Combobox with the shipper names from the database
@@ -360,6 +468,7 @@ def display_selected_answer():
             answers_text.insert(tk.END, f"{column}: {value}\n")
 
         answers_text.configure(state="disabled")
+        refresh_dropdown_and_text()
     except KeyError as e:
         print("Error: Shipper-Receiver combination not found in the dictionary.")
         print("Detailed Error:", str(e))
@@ -377,7 +486,6 @@ def refresh_dropdown_and_text():
         if not rows:
             return
 
-        print("Rows fetched from the database:", rows)
 
         # Update the dropdown with valid shipper-receiver names
         valid_shipper_receiver_names = []
@@ -385,25 +493,29 @@ def refresh_dropdown_and_text():
 
         for row in rows:
             shipper_name = row[0]
-            receiver_name = row[5]
+            receiver_name = row[6]
             if shipper_name and receiver_name:
                 shipper_receiver_name = f"{shipper_name} - {receiver_name}"
                 valid_shipper_receiver_names.append(shipper_receiver_name)
                 ans_dict[shipper_receiver_name] = {
-                    "Shipper Name": shipper_name,
+                    "Date": row[13],
+                    "-----": "-----",
+                    "Shipper Name": row[0],
                     "Shipper Address": row[1],
-                    "Shipment Description": row[2],
-                    "Shipment Destination": row[3],
-                    "Shipment Service": row[4],
-                    "Receiver Name": receiver_name,
-                    "Receiver Address": row[6],
-                    "Receiver Zipcode": row[7],
-                    "Shipment Weight": row[8],
-                    "Shipment Charges": row[9]
+                    "Shipper Contact Number": row[2],
+                    "------": "-----",
+                    "Receiver Name": row[6],
+                    "Receiver Address": row[7],
+                    "Receiver Contact Number": row[8],
+                    "Receiver Zipcode": row[9],
+                    "-------": "-----",
+                    "Shipment Description": row[3],
+                    "Shipment Destination": row[4],
+                    "Shipment Service": row[5],
+                    "Number of Pieces": row[12],
+                    "Shipment Weight": row[10],
+                    "Shipment Charges": row[11]
                 }
-
-        print("Valid shipper-receiver names:", valid_shipper_receiver_names)
-        print("Answer dictionary:", ans_dict)
 
         answer_dropdown["values"] = valid_shipper_receiver_names
         answer_dropdown.rows = ans_dict
@@ -411,33 +523,30 @@ def refresh_dropdown_and_text():
         # Display the selected answer in the text widget
         display_selected_answer()
 
-    except Exception as e:
-        print("Error:", str(e))
+    except Exception as error:
+        print(f"Error in refresh_dropdown_and_text: {str(error)}")
         pass
 
 
 # Create a button to display the selected answer
-display_button = tk.Button(answers_tab, text="Display Answer", command=display_selected_answer, fg="white", bg="black")
-display_button.pack()
+display_button = ttk.Button(answers_tab, text="Display Answer", command=display_selected_answer)
+display_button.pack(padx=10, pady=1)
 
 # Create a button to refresh
-refresh_button = tk.Button(answers_tab, text="Refresh", command=refresh_dropdown_and_text, fg="white", bg="black")
+refresh_button = ttk.Button(answers_tab, text="Refresh", command=refresh_dropdown_and_text)
 refresh_button.pack()
 
 
 # Exit function
-def exit():
+def exit_win():
     window.destroy()
 
 
 # Bind the F11 key to toggle fullscreen
 window.bind("<F11>", lambda event: toggle_fullscreen())
 
-# Bind the Escape key to exit fullscreen
-window.bind("<F11>", lambda event: window.attributes('-fullscreen', False))
-
 # Bind the Escape key to toggle fullscreen
-window.bind("<Escape>", lambda event: exit())
+window.bind("<Escape>", lambda event: exit_win())
 
 # Retrieve and display the initial data from the table in the Answers tab
 cursor.execute('SELECT * FROM answers')

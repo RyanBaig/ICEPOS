@@ -10,7 +10,7 @@
 - [x] pywin32 ([win32print](http://timgolden.me.uk/pywin32-docs/win32print.html), [win32ui](http://timgolden.me.uk/pywin32-docs/win32ui.html))
 - [x] PIL aka Pillow ([Image](https://pillow.readthedocs.io/en/stable/reference/Image.html), [ImageDraw](https://pillow.readthedocs.io/en/stable/reference/ImageDraw.html), [ImageFont](https://pillow.readthedocs.io/en/stable/reference/ImageFont.html))
 - [x] Screeninfo (couldn't find the documentation sorry)
-- [x] [Os](https://docs.python.org/3/library/os.html)
+- [x] [OS](https://docs.python.org/3/library/os.html)
 ### Functions: (This will be a very long list)
 #### [**icepos.py:**](https://github.com/RyanGamingYT/ICEPOS/blob/master/icepos.py)
 - [x] close_connection (To close the connection for the database when the main window is closed Too.)
