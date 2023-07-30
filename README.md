@@ -35,3 +35,12 @@
 - [x] create_db (To create the new database for the reset function)
 - [x] db_To_dict (converts the submissions stored in the database inTo a dictionary To easily display the information)
 - [x] delete_db (To delete the database for the reset function)
+### Screenshots:
+
+![Submission Tab (Sidebar Closed)](https://github.com/RyanGamingYT/ICEPOS/blob/master/media/screenshots/Submission%20Tab%20(Sidebar%20Closed).JPG)
+
+![Submission Tab (Sidebar Open)](https://github.com/RyanGamingYT/ICEPOS/blob/master/media/screenshots/Submission%20Tab%20(Sidebar%20Open).JPG)
+
+![Answers Tab (No Answer Selected)](https://github.com/RyanGamingYT/ICEPOS/blob/master/media/screenshots/Answers%20Tab%20(No%20Answer%20Selected).JPG)
+
+![Answers Tab (Sample Answer Selected)](https://github.com/RyanGamingYT/ICEPOS/blob/master/media/screenshots/Answers%20Tab%20(Sample%20Answer%20Selected).JPG)
