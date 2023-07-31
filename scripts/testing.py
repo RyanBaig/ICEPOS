@@ -27,7 +27,7 @@ window.geometry("400x300")
 window.resizable(False, False)
 
 # Load the PNG icon for the hamburger menu
-menu_icon = tk.PhotoImage(file="/media/icons/menu.png")
+menu_icon = tk.PhotoImage(file="../media/images/menu.png")
 
 # Create the hamburger button using the PNG icon
 hamburger = tk.Button(window, image=menu_icon, command=toggle_menu, bd=0)
