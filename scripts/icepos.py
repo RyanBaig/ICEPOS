@@ -21,7 +21,7 @@ height = screen_info.height
 window = tk.Tk()
 window.title("ICE AIRWAY BILL")
 window.geometry(f"{width}x{height}")
-window.iconbitmap("C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\media\\images\\icon.ico")
+window.iconbitmap("media\\images\\icon.ico")
 
 # Set the style for ttk widgets
 style = ttk.Style()
@@ -37,62 +37,6 @@ style.configure("TButton", padding=2, font=("Arial", 12))
 
 # Customize the ttk.Combobox widget appearance
 style.configure("TCombobox", padding=5, font=("Arial", 14))
-
-
-# Function to update the dropdown and text widget when the Refresh button is clicked
-def refresh_dropdown_and_text():
-    try:
-        # Create a connection to the SQLite database
-        _conn = sqlite3.connect('C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\other\\ice-answers.db')
-
-        # Create a cursor object from the connection
-        _cursor = conn.cursor()
-        # Fetch data from the database
-        cursor.execute('SELECT * FROM answers')
-        _rows = cursor.fetchall()
-
-        # If there are no records in the database, return without making any changes
-        if not rows:
-            return
-
-        # Update the dropdown with valid shipper-receiver names
-        valid_shipper_receiver_names = []
-        ans_dict = {}
-
-        for row in rows:
-            shipper_name = row[0]
-            receiver_name = row[6]
-            consign_key = row[14]
-            if shipper_name and receiver_name and consign_key:
-                shipper_receiver_consign_names = f"{shipper_name} - {receiver_name} - {consign_key}"
-                valid_shipper_receiver_names.append(shipper_receiver_consign_names)
-                ans_dict[shipper_receiver_consign_names] = {
-                    "Date": row[13],
-                    "Consignment Key": consign_key,
-                    "-----": "-----",
-                    "Shipper Name": row[0],
-                    "Shipper Address": row[1],
-                    "Shipper Contact Number": row[2],
-                    "------": "-----",
-                    "Receiver Name": row[6],
-                    "Receiver Address": row[7],
-                    "Receiver Contact Number": row[8],
-                    "Receiver Zipcode": row[9],
-                    "-------": "-----",
-                    "Shipment Description": row[3],
-                    "Shipment Destination": row[4],
-                    "Shipment Service": row[5],
-                    "Number of Pieces": row[12],
-                    "Shipment Weight": row[10],
-                    "Shipment Charges": row[11]
-                }
-
-        answer_dropdown["values"] = valid_shipper_receiver_names
-        answer_dropdown.rows = ans_dict
-
-    except Exception as error:
-        print(f"Error in refresh_dropdown_and_text: {str(error)}")
-        pass
 
 
 def toggle_menu():
@@ -128,6 +72,11 @@ def generate_consign_key():
     return consign_key
 
 
+def display_consign_key():
+    latest_key = load_last_consign_key()
+    messagebox.showinfo("Last Used Consign Key",f"The latest used consign key is {latest_key}.")
+
+
 # Create a Tab Control
 tab_control = ttk.Notebook(window)
 
@@ -149,7 +98,7 @@ background_image = tk.PhotoImage(file="media\\images\\background.png")
 submission_canvas.create_image(0, 0, anchor=tk.NW, image=background_image)
 
 # Create the hamburger button using the PNG icon
-menu_icon = tk.PhotoImage(file="C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\media\\images\\menu.png")
+menu_icon = tk.PhotoImage(file="media\\images\\menu.png")
 hamburger = tk.Button(submission_canvas, image=menu_icon, command=toggle_menu, bd=0)
 hamburger.place(x=10, y=10, anchor=tk.NW)  # Position the hamburger button in the top-left corner
 
@@ -218,7 +167,7 @@ entry_rec_contact = ttk.Entry(submission_tab, width=20, font=("Arial", 14), styl
 entry_rec_contact.place(x=725, y=577)
 
 # Create a connection to the SQLite database
-conn = sqlite3.connect('C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\other\\ice-answers.db')
+conn = sqlite3.connect('other\\ice-answers.db')
 
 # Create a cursor object from the connection
 cursor = conn.cursor()
@@ -271,13 +220,12 @@ def submit():
                     date,
                     consign_identifier
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-""", (ship_name, ship_address, ship_contact, ship_desc, ship_dest, ship_serv, rec_name, rec_address, rec_contact,
-      rec_zipcode, ship_weight, ship_charges, no_of_pieces, date, generate_consign_key()))
+""", (ship_name, ship_address, ship_contact, ship_desc, ship_dest, ship_serv, rec_name, rec_address, rec_contact, rec_zipcode, ship_weight, ship_charges, no_of_pieces, date, generate_consign_key()))
 
             conn.commit()  # Commit the changes to the database
             # Refresh the dropdown and display the updated data in the Text widget
             refresh_dropdown_and_text()
-            messagebox.showinfo("Data Submission", "Data Submitted Successfully!")
+            messagebox.showinfo("Data Submission", "Data Submitted Successfully")
     except Exception as e:
         print("Error in submit function:", str(e))
         pass
@@ -455,7 +403,7 @@ def reset():
             conn.close()
         except NameError:
             pass
-        with open("other\\keys.pkl", "w") as f:
+        with open("C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\other\\keys.pkl", "w") as f:
             f.truncate()
         delete_db()
         create_db()
@@ -474,6 +422,10 @@ tab_control.add(answers_tab, text='Answers')
 fullscreen_button = ttk.Button(sidebar, text="Toggle Fullscreen", command=toggle_fullscreen)
 fullscreen_button.grid(row=0, column=0, padx=5, pady=5, sticky="w")
 
+# Create a button to show last used consign key
+last_c_key_button = ttk.Button(sidebar, text="Show Last Used Consign Key", command=display_consign_key)
+last_c_key_button.grid(row=0, column=0, padx=5, pady=5, sticky="w")
+
 # Create a button to reset all data
 reset_button = ttk.Button(submission_tab, text="Reset All Data", command=reset)
 reset_button.place(x=650, y=656)
@@ -486,25 +438,23 @@ answers_text.configure(state="disabled")  # Set the state to "disabled"
 selected_answer = StringVar()
 
 # Create a Combobox for the dropdown
-answer_dropdown = ttk.Combobox(answers_tab, style="Custom.TCombobox", textvariable=selected_answer, width=50,
+answer_dropdown = ttk.Combobox(answers_tab, style="Custom.TCombobox", textvariable=selected_answer, width=30,
                                state="readonly")
 answer_dropdown.pack()
 
 # Populate the Combobox with the shipper names from the database
-cursor.execute('SELECT shipper_name, receiver_name, consign_identifier FROM answers')
-shipper_receiver_consign_names = cursor.fetchall()
-answer_dropdown["values"] = [f"{shipper[0]} - {shipper[1]} - {shipper[2]}" for shipper in
-                             shipper_receiver_consign_names]
+cursor.execute('SELECT shipper_name, receiver_name FROM answers')
+shipper_receiver_names = cursor.fetchall()
+answer_dropdown["values"] = [f"{shipper} - {receiver}" for shipper, receiver in shipper_receiver_names]
 
 # Initialize 'rows' attribute for the answer_dropdown
 answer_dropdown.rows = {}
 
 
 def refresh_dropdown():
-    cursor.execute('SELECT shipper_name, receiver_name, consign_identifier FROM answers')
-    shipper_receiver_consign_names = cursor.fetchall()
-    answer_dropdown["values"] = [f"{shipper[0]} - {shipper[1]} - {shipper[2]}" for shipper in
-                                 shipper_receiver_consign_names]
+    cursor.execute('SELECT shipper_name, receiver_name FROM answers')
+    shipper_receiver_names = cursor.fetchall()
+    answer_dropdown["values"] = [f"{shipper[0]} - {shipper[1]}" for shipper in shipper_receiver_names]
 
 
 # Refresh the dropdown data initially
@@ -521,24 +471,82 @@ def update_dropdown_with_data():
 # Function to display the selected answer in the Text widget
 def display_selected_answer():
     try:
+        # Update the dropdown and text with latest data
+        refresh_dropdown_and_text()
+
         selected_value = selected_answer.get()
+
+        # Fetch the selected answer data from the dropdown.rows dictionary
         ans_dict = answer_dropdown.rows.get(selected_value)
 
+        # If the selected answer data is not found, return without making any changes
         if ans_dict is None:
             return
 
         answers_text.configure(state="normal")
         answers_text.delete(1.0, tk.END)
 
+        # Format and display all fields of the selected answer
         for column, value in ans_dict.items():
             answers_text.insert(tk.END, f"{column}: {value}\n")
 
         answers_text.configure(state="disabled")
-
+        refresh_dropdown_and_text()
     except KeyError as e:
-        print("Error: Shipper-Receiver-Consignment combination not found in the dictionary.")
+        print("Error: Shipper-Receiver combination not found in the dictionary.")
         print("Detailed Error:", str(e))
         pass
+
+
+# Function to update the dropdown and text widget when the Refresh button is clicked
+def refresh_dropdown_and_text():
+    try:
+        # Fetch data from the database
+        cursor.execute('SELECT * FROM answers')
+        rows = cursor.fetchall()
+
+        # If there are no records in the database, return without making any changes
+        if not rows:
+            return
+
+        # Update the dropdown with valid shipper-receiver names
+        valid_shipper_receiver_names = []
+        ans_dict = {}
+
+        for row in rows:
+            shipper_name = row[0]
+            receiver_name = row[6]
+            if shipper_name and receiver_name:
+                shipper_receiver_name = f"{shipper_name} - {receiver_name}"
+                valid_shipper_receiver_names.append(shipper_receiver_name)
+                ans_dict[shipper_receiver_name] = {
+                    "Date": row[13],
+                    "Consignment Key": row[14],
+                    "-----": "-----",
+                    "Shipper Name": row[0],
+                    "Shipper Address": row[1],
+                    "Shipper Contact Number": row[2],
+                    "------": "-----",
+                    "Receiver Name": row[6],
+                    "Receiver Address": row[7],
+                    "Receiver Contact Number": row[8],
+                    "Receiver Zipcode": row[9],
+                    "-------": "-----",
+                    "Shipment Description": row[3],
+                    "Shipment Destination": row[4],
+                    "Shipment Service": row[5],
+                    "Number of Pieces": row[12],
+                    "Shipment Weight": row[10],
+                    "Shipment Charges": row[11]
+                }
+
+        answer_dropdown["values"] = valid_shipper_receiver_names
+        answer_dropdown.rows = ans_dict
+
+    except Exception as error:
+        print(f"Error in refresh_dropdown_and_text: {str(error)}")
+        pass
+
 
 
 # Create a button to display the selected answer
@@ -571,8 +579,6 @@ update_dropdown_with_data()
 # Add a close button to the sidebar
 close_button = ttk.Button(sidebar, text="Close", command=close_menu)
 close_button.grid(row=1, column=0, padx=5, pady=5, sticky="w")
-
-refresh_dropdown_and_text()
 
 # Run the Tkinter event loop
 window.mainloop()

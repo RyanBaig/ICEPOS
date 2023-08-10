@@ -4,7 +4,7 @@ import sqlite3
 
 def create_db():
     # Create a connection to the SQLite database or create a new one if it doesn't exist
-    conn = sqlite3.connect('C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\other\\ice-answers.db')
+    conn = sqlite3.connect('other\\ice-answers.db')
 
     # Create a cursor object from the connection to execute SQL commands
     cursor = conn.cursor()
@@ -42,7 +42,7 @@ def create_db():
 
 def db_to_dict(fields):
     # Create a connection to the SQLite database or create a new one if it doesn't exist
-    conn = sqlite3.connect('C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\other\\ice-answers.db')
+    conn = sqlite3.connect('other\\ice-answers.db')
 
     # Create a cursor object from the connection to execute SQL commands
     cursor = conn.cursor()
@@ -81,7 +81,7 @@ def db_to_dict(fields):
 def delete_db():
     import os
     # Create a connection to the SQLite database or create a new one if it doesn't exist
-    conn = sqlite3.connect('../ice-answers.db')
+    conn = sqlite3.connect('other\\ice-answers.db')
 
     # Create a cursor object from the connection to execute SQL commands
     cursor = conn.cursor()

@@ -30,6 +30,7 @@
 - [x] close_menu (close the sidebar/menu and works with toggle_menu)
 - [x] generate_consign_key (to generate a special key to differentiate between different shipments)
 - [x] load_last_consign_key (self-explanatory and works with generate_consign_key)
+- [x] display_consign_key (displays the last-used consign key using the information messagebox. Made for the button in sidebar.)
 - [x] toggle_menu (to toggle the sidebar/menu and uses close_menu)
 #### [**database_functions.py:**](https://github.com/RyanGamingYT/blob/master/database_functions.py)
 - [x] create_db (To create the new database for the reset function)
