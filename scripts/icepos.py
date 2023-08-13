@@ -1,14 +1,16 @@
 import tkinter
 import tkinter as tk
-from tkinter import messagebox, ttk, StringVar
+from tkinter import messagebox, ttk, StringVar, filedialog, simpledialog
 import sqlite3
 import win32print
 import win32ui
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageTk
 import screeninfo
 import os
 from database_functions import *
 import pickle
+from math import sin, pi, cos
+import time
 
 # Get the primary monitor information
 screen_info = screeninfo.get_monitors()[0]
@@ -21,7 +23,7 @@ height = screen_info.height
 window = tk.Tk()
 window.title("ICE AIRWAY BILL")
 window.geometry(f"{width}x{height}")
-window.iconbitmap("media\\images\\icon.ico")
+window.iconbitmap("C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\media\\images\\icon.ico")
 
 # Set the style for ttk widgets
 style = ttk.Style()
@@ -39,21 +41,36 @@ style.configure("TButton", padding=2, font=("Arial", 12))
 style.configure("TCombobox", padding=5, font=("Arial", 14))
 
 
+def animate_sidebar(target_x):
+    start_x = sidebar.winfo_x()
+    distance = target_x - start_x
+    duration = 20  # Number of frames for the animation
+
+    for frame in range(1, duration + 1):
+        progress = frame / duration
+        eased_progress = 0.5 - 0.5 * cos(pi * progress)
+        new_x = start_x + distance * eased_progress
+        sidebar.place(x=new_x, y=0, relheight=1, anchor=tk.NW)
+        window.update()
+        time.sleep(0.02)  # Adjust this delay to control the animation speed
+
+
 def toggle_menu():
-    if sidebar.winfo_x() < 0:  # Sidebar is hidden
-        sidebar.place(x=0)
-    else:  # Sidebar is visible
-        sidebar.place(x=-200)
+    current_x = sidebar.winfo_x()
+    target_x = -350 if current_x >= 0 else 0
+    animate_sidebar(target_x)
 
 
 def close_menu():
-    if sidebar.winfo_x() >= 0:  # Sidebar is visible
-        sidebar.place(x=-200)
+    global animation_direction
+    animation_direction = 0  # Set direction to close
+    target_x = -300  # Target position for closing the sidebar
+    animate_sidebar(target_x)
 
 
 def load_last_consign_key():
     try:
-        with open("other\\keys.pkl", "rb") as file:
+        with open("C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\other\\keys.pkl", "rb") as file:
             last_key = pickle.load(file)
     except EOFError:
         last_key = 0
@@ -74,7 +91,38 @@ def generate_consign_key():
 
 def display_consign_key():
     latest_key = load_last_consign_key()
-    messagebox.showinfo("Last Used Consign Key",f"The latest used consign key is {latest_key}.")
+    messagebox.showinfo("Last Used Consign Key", f"The latest used consign key is ICE-SHIP-{latest_key}.")
+
+
+def change_profile_pic():
+    file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.jpg *.jpeg *.png *.svg")])
+    if file_path:
+        rectangular_image = Image.open(file_path)
+        resized_image = rectangular_image.resize((120, 120), Image.LANCZOS)
+
+        mask = Image.new("L", (120, 120), 0)
+        draw = ImageDraw.Draw(mask)
+        draw.ellipse((0, 0, 120, 120), fill=255)
+
+        circular_image = Image.new("RGBA", (120, 120))
+        circular_image.paste(resized_image, (0, 0), mask)
+
+        circular_image_tk = ImageTk.PhotoImage(circular_image)
+
+        profile_b.config(image=circular_image_tk)
+        profile_b.image = circular_image_tk
+
+        # Save the selected image path to a file
+        with open("selected_image_path.txt", "w") as file:
+            file.write(file_path)
+
+
+def get_username():
+    name = simpledialog.askstring("Username", "Please enter your username")
+    if name:
+        with open("C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\other\\username.txt", "w") as file:
+            file.write(name)
+        name_button.configure(text=name)
 
 
 # Create a Tab Control
@@ -92,19 +140,52 @@ submission_canvas = tk.Canvas(submission_tab, width=1350, height=700)
 submission_canvas.pack()
 
 # Load the background image for the Submission tab
-background_image = tk.PhotoImage(file="media\\images\\background.png")
+background_image = tk.PhotoImage(file="C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\media\\images\\background.png")
 
 # Place the background image on the Canvas
 submission_canvas.create_image(0, 0, anchor=tk.NW, image=background_image)
 
+# Create the sidebar (hamburger menu content)
+sidebar = tk.Frame(window, bg="lightgray", width=200)
+sidebar.place(x=-300, y=0, relheight=1, anchor=tk.NW)
+
 # Create the hamburger button using the PNG icon
-menu_icon = tk.PhotoImage(file="media\\images\\menu.png")
+menu_icon = tk.PhotoImage(file="C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\media\\images\\menu.png")
 hamburger = tk.Button(submission_canvas, image=menu_icon, command=toggle_menu, bd=0)
 hamburger.place(x=10, y=10, anchor=tk.NW)  # Position the hamburger button in the top-left corner
 
-# Create the sidebar (hamburger menu content)
-sidebar = tk.Frame(window, bg="lightgray", width=200)
-sidebar.place(x=-200, y=0, relheight=1, anchor=tk.NW)
+personal_info_label = ttk.Label(sidebar, text="Personal Information", font=("Arial", 15))
+personal_info_label.pack(pady=5)
+
+# Load the saved image path
+saved_image_path = None
+try:
+    with open("selected_image_path.txt", "r") as file:
+        saved_image_path = file.readline().strip()
+except FileNotFoundError:
+    pass
+
+# Set the default profile icon or load the saved image
+if saved_image_path:
+    rectangular_image = Image.open(saved_image_path)
+    resized_image = rectangular_image.resize((120, 120), Image.LANCZOS)
+
+    mask = Image.new("L", (120, 120), 0)
+    draw = ImageDraw.Draw(mask)
+    draw.ellipse((0, 0, 120, 120), fill=255)
+
+    circular_image = Image.new("RGBA", (120, 120))
+    circular_image.paste(resized_image, (0, 0), mask)
+
+else:
+    circular_image = Image.open("C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\media\\images\\default_profile.png")
+
+circular_image_tk = ImageTk.PhotoImage(circular_image)
+
+# Create the profile button using the loaded/saved image
+profile_b = tk.Button(sidebar, image=circular_image_tk, command=change_profile_pic, bd=0, height=120, width=120)
+profile_b.image = circular_image_tk  # Store the reference to avoid image garbage collection
+profile_b.pack(pady=5)
 
 # Shipper name (1)
 entry_ship_name = ttk.Entry(submission_tab, width=55, font=("Arial", 14), style="TEntry")
@@ -167,7 +248,7 @@ entry_rec_contact = ttk.Entry(submission_tab, width=20, font=("Arial", 14), styl
 entry_rec_contact.place(x=725, y=577)
 
 # Create a connection to the SQLite database
-conn = sqlite3.connect('other\\ice-answers.db')
+conn = sqlite3.connect('C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\other\\ice-answers.db')
 
 # Create a cursor object from the connection
 cursor = conn.cursor()
@@ -220,7 +301,8 @@ def submit():
                     date,
                     consign_identifier
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-""", (ship_name, ship_address, ship_contact, ship_desc, ship_dest, ship_serv, rec_name, rec_address, rec_contact, rec_zipcode, ship_weight, ship_charges, no_of_pieces, date, generate_consign_key()))
+""", (ship_name, ship_address, ship_contact, ship_desc, ship_dest, ship_serv, rec_name, rec_address, rec_contact,
+      rec_zipcode, ship_weight, ship_charges, no_of_pieces, date, generate_consign_key()))
 
             conn.commit()  # Commit the changes to the database
             # Refresh the dropdown and display the updated data in the Text widget
@@ -235,7 +317,7 @@ def submit():
 def create_formatted_image(ship_name, ship_address, ship_desc, ship_dest, ship_serv, rec_name, rec_address, rec_zipcode,
                            ship_weight, ship_charges, no_of_pieces, date, ship_contact, rec_contact, serial_no):
     # Load the background image
-    background_img = Image.open("C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\media\\images/airway_bill_for_printing.png")
+    background_img = Image.open("media\\images/airway_bill_for_printing.png")
 
     # Create a drawing context
     draw = ImageDraw.Draw(background_img)
@@ -403,7 +485,7 @@ def reset():
             conn.close()
         except NameError:
             pass
-        with open("C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\other\\keys.pkl", "w") as f:
+        with open("other\\keys.pkl", "w") as f:
             f.truncate()
         delete_db()
         create_db()
@@ -418,13 +500,33 @@ window.protocol("WM_DELETE_WINDOW", close_connection)
 answers_tab = ttk.Frame(tab_control)
 tab_control.add(answers_tab, text='Answers')
 
+# Create a button to input name
+name_button = ttk.Button(sidebar, text="Your Username", command=get_username)
+name_button.pack(pady=5)
+
+# Label for settings
+settings_label = ttk.Label(sidebar, text="Settings", font=("Arial", 15))
+settings_label.pack(pady=5)
+
+saved_username = None
+try:
+    with open("C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\other\\username.txt", "r") as file:
+        saved_username = file.readline().strip()
+except FileNotFoundError:
+    pass
+
+if saved_username:
+    name_button.configure(text=saved_username)
+
 # Create a button to toggle fullscreen
 fullscreen_button = ttk.Button(sidebar, text="Toggle Fullscreen", command=toggle_fullscreen)
-fullscreen_button.grid(row=0, column=0, padx=5, pady=5, sticky="w")
+# fullscreen_button.grid(row=0, column=0, padx=5, pady=5, sticky="w")
+fullscreen_button.pack(side="top", padx=5, pady=5, fill="x")
 
 # Create a button to show last used consign key
 last_c_key_button = ttk.Button(sidebar, text="Show Last Used Consign Key", command=display_consign_key)
-last_c_key_button.grid(row=0, column=0, padx=5, pady=5, sticky="w")
+# last_c_key_button.grid(row=0, column=0, padx=5, pady=5, sticky="w")
+last_c_key_button.pack(side="top", padx=5, pady=5, fill="x")
 
 # Create a button to reset all data
 reset_button = ttk.Button(submission_tab, text="Reset All Data", command=reset)
@@ -548,7 +650,6 @@ def refresh_dropdown_and_text():
         pass
 
 
-
 # Create a button to display the selected answer
 display_button = ttk.Button(answers_tab, text="Display Answer", command=display_selected_answer)
 display_button.pack(padx=10, pady=1)
@@ -576,9 +677,14 @@ rows = cursor.fetchall()
 # Retrieve and display the initial data from the table in the Answers tab
 update_dropdown_with_data()
 
-# Add a close button to the sidebar
-close_button = ttk.Button(sidebar, text="Close", command=close_menu)
-close_button.grid(row=1, column=0, padx=5, pady=5, sticky="w")
+
+
+close_button = ttk.Button(sidebar, text="Close", command=close_menu, width=5)
+close_button.pack()
+
+# Create a button to toggle the sidebar
+menu_button = ttk.Button(submission_tab, text="Toggle Menu", style="TButton", width=10, command=toggle_menu)
+menu_button.place(x=600, y=600)
 
 # Run the Tkinter event loop
 window.mainloop()
