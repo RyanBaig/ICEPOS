@@ -14,7 +14,7 @@ cd ICEPOS
 ```
 - Type `run.bat` or `./run.bat` if you are using Windows Powershell.
 - It will automatically install all dependencies (if needed) for the app to work.
-- If you want to use it frequently then create a shortcut for the `run.bat` file. 
+- If you want to use it frequently then create a shortcut ([ICEPOS.ink](ICE%20POS.lnk)) for the `run.bat` file. 
 
 ## Features
 
@@ -34,9 +34,9 @@ cd ICEPOS
 
 ## Functions
 
-### icepos.py
+### [icepos.py](scripts/icepos.py)
 
-- `close_connection`: Closes the database connection when the main window is closed.
+
 - `create_formatted_image`: Creates a formatted image for printing receipts.
 - `display_selected_answer`: Displays selected answers in the Answers Tab.
 - `exit_win`: Allows the user to exit the program using the ESC key.
@@ -44,21 +44,33 @@ cd ICEPOS
 - `print_image`: Prints a previously created image.
 - `refresh_dropdown`: Refreshes the dropdown in the Answers Tab to check for new submissions.
 - `refresh_dropdown_and_text`: Displays answers in the text widget in the Answers Tab.
-- `reset`: Clears all submissions by deleting and creating a new SQLite database.
 - `submit`: Submits answers to the database.
 - `toggle_fullscreen`: Toggles fullscreen mode using F11 key or the button in the top-right corner.
 - `update_dropdown_with_data`: Adds support for the dropdown being used more than once.
 - `close_menu`: Closes the sidebar/menu and works with toggle_menu.
+- `toggle_menu`: Toggles the sidebar/menu and uses close_menu.
+
+
+### [py_functions.py](scripts/py_functions.py)
+
+
+- `reset`: Clears all submissions by deleting and creating a new SQLite database.
+- `save_last_consign_key`: Saves the consign key in [keys.pkl](other/keys.pkl).
 - `generate_consign_key`: Generates a special key for differentiating shipments.
 - `load_last_consign_key`: Loads the last-used consign key.
 - `display_consign_key`: Displays the last-used consign key using an information messagebox.
-- `toggle_menu`: Toggles the sidebar/menu and uses close_menu.
-
-### database_functions.py
-
+- `close_connection`: Closes the database connection when the main window is closed.
 - `create_db`: Creates a new database for the reset function.
 - `db_To_dict`: Converts database submissions into a dictionary for easy display.
 - `delete_db`: Deletes the database for the reset function.
+
+
+### [run.py](scripts/run.py)
+
+
+- `check_packages`: Checks if any packages need to be installed (from [requirements.txt](other/requirements.txt)) when the 
+  program is [run](run.bat). 
+
 
 ## Screenshots
 #### Submission Tab (Sidebar Closed)
@@ -71,4 +83,4 @@ cd ICEPOS
 - ![Answers Tab (Sample Answer Selected)](https://github.com/RyanGamingYT/ICEPOS/blob/master/media/screenshots/Answers%20Tab%20(Sample%20Answer%20Selected).JPG)
 
 ## License
-- This Project is Licensed under the [GPL-3.0 License](LICENSE.txt)
+- This Project is Licensed under the [GPL-3.0 License](LICENSE.txt).
