@@ -7,10 +7,12 @@ import win32ui
 from PIL import Image, ImageDraw, ImageFont, ImageTk
 import screeninfo
 import os
-from database_functions import *
+from functions import *
 import pickle
 from math import sin, pi, cos
 import time
+
+
 
 # Get the primary monitor information
 screen_info = screeninfo.get_monitors()[0]
@@ -19,11 +21,12 @@ screen_info = screeninfo.get_monitors()[0]
 width = screen_info.width
 height = screen_info.height
 
+
 # Create the Tkinter window and set size and icon
 window = tk.Tk()
 window.title("ICE AIRWAY BILL")
 window.geometry(f"{width}x{height}")
-window.iconbitmap("C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\media\\images\\icon.ico")
+window.iconbitmap("media\\images\\icon.ico")
 
 # Set the style for ttk widgets
 style = ttk.Style()
@@ -70,7 +73,7 @@ def close_menu():
 
 def load_last_consign_key():
     try:
-        with open("C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\other\\keys.pkl", "rb") as file:
+        with open("other\\keys.pkl", "rb") as file:
             last_key = pickle.load(file)
     except EOFError:
         last_key = 0
@@ -113,14 +116,14 @@ def change_profile_pic():
         profile_b.image = circular_image_tk
 
         # Save the selected image path to a file
-        with open("selected_image_path.txt", "w") as file:
+        with open("../other/selected_image_path.txt", "w") as file:
             file.write(file_path)
 
 
 def get_username():
     name = simpledialog.askstring("Username", "Please enter your username")
     if name:
-        with open("C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\other\\username.txt", "w") as file:
+        with open("\\other\\username.txt", "w") as file:
             file.write(name)
         name_button.configure(text=name)
 
@@ -140,7 +143,7 @@ submission_canvas = tk.Canvas(submission_tab, width=1350, height=700)
 submission_canvas.pack()
 
 # Load the background image for the Submission tab
-background_image = tk.PhotoImage(file="C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\media\\images\\background.png")
+background_image = tk.PhotoImage(file="\\media\\images\\background.png")
 
 # Place the background image on the Canvas
 submission_canvas.create_image(0, 0, anchor=tk.NW, image=background_image)
@@ -150,7 +153,7 @@ sidebar = tk.Frame(window, bg="lightgray", width=200)
 sidebar.place(x=-300, y=0, relheight=1, anchor=tk.NW)
 
 # Create the hamburger button using the PNG icon
-menu_icon = tk.PhotoImage(file="C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\media\\images\\menu.png")
+menu_icon = tk.PhotoImage(file="\\media\\images\\menu.png")
 hamburger = tk.Button(submission_canvas, image=menu_icon, command=toggle_menu, bd=0)
 hamburger.place(x=10, y=10, anchor=tk.NW)  # Position the hamburger button in the top-left corner
 
@@ -160,7 +163,7 @@ personal_info_label.pack(pady=5)
 # Load the saved image path
 saved_image_path = None
 try:
-    with open("selected_image_path.txt", "r") as file:
+    with open("../other/selected_image_path.txt", "r") as file:
         saved_image_path = file.readline().strip()
 except FileNotFoundError:
     pass
@@ -178,7 +181,7 @@ if saved_image_path:
     circular_image.paste(resized_image, (0, 0), mask)
 
 else:
-    circular_image = Image.open("C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\media\\images\\default_profile.png")
+    circular_image = Image.open("\\media\\images\\default_profile.png")
 
 circular_image_tk = ImageTk.PhotoImage(circular_image)
 
@@ -510,7 +513,7 @@ settings_label.pack(pady=5)
 
 saved_username = None
 try:
-    with open("C:\\Users\\Hp\\PycharmProjects\\ICEPOS\\other\\username.txt", "r") as file:
+    with open("\\other\\username.txt", "r") as file:
         saved_username = file.readline().strip()
 except FileNotFoundError:
     pass
