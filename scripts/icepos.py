@@ -12,12 +12,140 @@ from math import sin, pi, cos
 import time
 import datetime
 import requests
+import subprocess
+import shutil
+import stat
 from py_functions import (
     close_connection, create_db, db_to_dict, delete_db, display_consign_key, generate_consign_key,
-    load_last_consign_key, save_last_consign_key, reset, check_update
+    load_last_consign_key, save_last_consign_key
 )
-check_update()
+
 # Functions:
+def on_rm_error(func, path, exc_info):
+    # Change permissions to allow write and then unlink
+    os.chmod(path, stat.S_IWRITE)
+    os.unlink(path)
+
+def git_clone_with_progress(repo_url, destination_path):
+    # Create a Tkinter window for the message box
+    root = tk.Tk()
+    root.withdraw()  # Hide the main window
+
+    try:
+        if os.path.exists(destination_path):
+            for i in os.listdir(destination_path):
+                if i.endswith('.git'):
+                    tmp = os.path.join(destination_path, i)
+                    # Unhide the .git folder before unlinking it
+                    subprocess.call(['attrib', '-H', tmp])
+                    shutil.rmtree(tmp, onerror=on_rm_error)
+                    print(".git folder removed successfully.")
+    except Exception as e:
+        print("Error handling existing folder:", str(e))
+
+    try:
+        # Delete the entire directory (ICEPOS) if it exists
+        if os.path.exists(destination_path):
+            shutil.rmtree(destination_path, onerror=on_rm_error)
+            print("Directory removed successfully:", destination_path)
+    except Exception as e:
+        print("Error deleting directory:", str(e))
+
+    # Open a subprocess and capture its output
+    time.sleep(5)
+    process = subprocess.Popen(
+        f"git clone {repo_url} {destination_path}",
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True
+    )
+
+    # Update the message box with cloning progress
+    progress_message = ""
+    while True:
+        line = process.stdout.readline()
+        if not line:
+            break
+        progress_message += line
+        messagebox.showinfo("Cloning Progress", progress_message)
+
+    # Close the subprocess
+    process.communicate()
+
+    # Show a final message box with the completion status
+    if process.returncode == 0:
+        messagebox.showinfo("Cloning Completed", "Repository cloned successfully!")
+    else:
+        messagebox.showinfo("Cloning Failed", "Repository cloning failed.")
+
+
+def check_update():
+    def execute_check_update():
+        time.sleep(1)
+        close_connection()
+
+        # Get the current directory of the script
+        script_directory = os.path.dirname(os.path.abspath(__file__))
+
+        # Move to a different directory to avoid being inside the target directory
+        os.chdir(script_directory)
+
+        # Remove the target directory
+        target_directory = os.path.abspath("../ICEPOS")
+        if os.path.exists(target_directory):
+            try:
+                os.removedirs(target_directory)
+            except Exception as e:
+                print("Error while removing directory:", str(e))
+                pass
+
+        # Clone the repository
+        git_clone_with_progress("https://github.com/RyanGamingYT/ICEPOS", "C:\\Users\\Hp\\Downloads\\ICEPOS")
+
+        messagebox.showinfo("ICEPOS Update", "ICEPOS has been updated to version " + VERSION)
+
+
+    CURRENT_VERSION = "v1.0"
+    URL = "https://ice-auth.ryanbaig.repl.co/api/check_update"
+    response = requests.get(URL)
+    if response.status_code == 200:
+        VERSION = response.json()["version"]
+        if CURRENT_VERSION != VERSION:
+           result = messagebox.askyesno("Update Needed","An Update has been found, do you want to update ICEPOS right now?")
+           if result:
+               window.destroy()  
+               execute_check_update()
+        else:
+            messagebox.showinfo("Update Information","ICEPOS is up to date.")
+
+
+def exit_win():
+    result = messagebox.askyesno("Confirmation", "Do you want to proceed?")
+    if result:
+        close_connection()
+        window.destroy()
+
+
+def reset():
+    global conn
+    conn = sqlite3.connect(os.path.abspath("other\\ice-answers.db"))
+    result = messagebox.askyesno("Confirmation", "Do you want to proceed?")
+    if result:
+        try:
+            conn.close()
+        except NameError:
+            pass
+        except PermissionError:
+            window.destroy()
+            reset()
+        with open(file=os.path.abspath("other\\keys.pkl"), mode="w") as f:
+            f.truncate()
+        delete_db()
+        create_db()
+        window.destroy()
+
+
 def toggle_fullscreen():
     if window.attributes('-fullscreen'):
         window.attributes('-fullscreen', False)
@@ -229,6 +357,7 @@ def create_formatted_image(ship_name, ship_address, ship_desc, ship_dest, ship_s
                            ship_weight, ship_charges, no_of_pieces, date, ship_contact, rec_contact, serial_no):
     # Load the background image
     background_img = Image.open(os.path.abspath("media\\images\\airway_bill_for_printing.png"))
+    print("Inside create_formatted_image function...")
 
     # Create a drawing context
     draw = ImageDraw.Draw(background_img)
@@ -411,10 +540,17 @@ submission_canvas = tk.Canvas(submission_tab, width=1350, height=700)
 submission_canvas.pack()
 
 # Load the background image for the Submission tab
-background_image = tk.PhotoImage(file=os.path.abspath("media/images/background.png"))
-
-# Place the background image on the Canvas
-submission_canvas.create_image(0, 0, anchor=tk.NW, image=background_image)
+print("Loading background image...")
+background_image_path = os.path.abspath("media/images/background.png")
+print("Background image path:", background_image_path)
+try:
+    background_image = tk.PhotoImage(file=background_image_path)
+    print("Background image loaded successfully.")
+    # Create an image item on the canvas with the background image
+    submission_canvas.create_image(0, 0, anchor=tk.NW, image=background_image)
+    print("Background image loaded on canvas Successfully.")
+except tk.TclError as e:
+    print("Error loading background image:", str(e))
 
 # Create the sidebar (hamburger menu content)
 sidebar = tk.Frame(window, bg="lightgray", width=200)
@@ -575,6 +711,11 @@ last_c_key_button = ttk.Button(sidebar, text="Show Last Used Consign Key", comma
 # last_c_key_button.grid(row=0, column=0, padx=5, pady=5, sticky="w")
 last_c_key_button.pack(side="top", padx=5, pady=5, fill="x")
 
+# Create a button to check for updates
+check_updates_button = ttk.Button(sidebar, text="Check For Updates", command=check_update)
+# last_c_key_button.grid(row=0, column=0, padx=5, pady=5, sticky="w")
+check_updates_button.pack(side="top", padx=5, pady=5, fill="x")
+
 # Create a button to reset all data
 reset_button = ttk.Button(submission_tab, text="Reset All Data", command=reset)
 reset_button.place(x=650, y=656)
@@ -629,7 +770,7 @@ refresh_button.pack()
 window.bind("<F11>", lambda event: toggle_fullscreen())
 
 # Bind the Escape key to toggle fullscreen
-window.bind("<Escape>", lambda event: window.destroy())
+window.bind("<Escape>", lambda event: exit_win())
 
 # Retrieve and display the initial data from the table in the Answers tab
 cursor.execute('SELECT * FROM answers')

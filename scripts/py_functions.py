@@ -1,6 +1,7 @@
 import os
 import sqlite3
 from tkinter import messagebox, filedialog, simpledialog
+
 import pickle
 import datetime
 from PIL import Image, ImageTk, ImageDraw
@@ -132,33 +133,4 @@ def close_connection():
     conn.close()
 
 
-def reset():
-    global conn
-    conn = sqlite3.connect(os.path.abspath("other\\ice-answers.db"))
-    result = messagebox.askyesno("Confirmation", "Do you want to proceed?")
-    if result:
-        try:
-            conn.close()
-        except NameError:
-            pass
-        except PermissionError:
-            window.destroy()
-            reset()
-        with open(file=os.path.abspath("other\\keys.pkl"), mode="w") as f:
-            f.truncate()
-        delete_db()
-        create_db()
-        window.destroy()
 
-def check_update():
-    CURRENT_VERSION = "v1.0"
-    URL = "https://ice-auth.ryanbaig.repl.co/api/check_update"
-    response = requests.get(URL)
-    if response.status_code == 200:
-        VERSION = response.json()["version"]
-        if CURRENT_VERSION != VERSION:
-            os.removedirs(os.path.abspath("../ICEPOS"))
-            os.system("git clone https://github.com/RyanGamingYT/ICEPOS")
-            messagebox.showinfo("ICEPOS Update", "ICEPOS has been updated to version " + VERSION)
-        else:
-            messagebox.showinfo("ICEPOS Update", "ICEPOS is up to date.")
