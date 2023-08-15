@@ -4,6 +4,7 @@ from tkinter import messagebox, filedialog, simpledialog
 import pickle
 import datetime
 from PIL import Image, ImageTk, ImageDraw
+import requests
 
 
 def create_db():
@@ -126,6 +127,8 @@ def display_consign_key():
 
 
 def close_connection():
+    # Create a connection to the SQLite database
+    conn = sqlite3.connect(os.path.abspath("other\\ice-answers.db"))
     conn.close()
 
 
@@ -146,3 +149,16 @@ def reset():
         delete_db()
         create_db()
         window.destroy()
+
+def check_update():
+    CURRENT_VERSION = "v1.0"
+    URL = "https://ice-auth.ryanbaig.repl.co/api/check_update"
+    response = requests.get(URL)
+    if response.status_code == 200:
+        VERSION = response.json()["version"]
+        if CURRENT_VERSION != VERSION:
+            os.removedirs(os.path.abspath("../ICEPOS"))
+            os.system("git clone https://github.com/RyanGamingYT/ICEPOS")
+            messagebox.showinfo("ICEPOS Update", "ICEPOS has been updated to version " + VERSION)
+        else:
+            messagebox.showinfo("ICEPOS Update", "ICEPOS is up to date.")

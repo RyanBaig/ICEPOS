@@ -11,12 +11,12 @@ import pickle
 from math import sin, pi, cos
 import time
 import datetime
+import requests
 from py_functions import (
     close_connection, create_db, db_to_dict, delete_db, display_consign_key, generate_consign_key,
-    load_last_consign_key, save_last_consign_key, reset
+    load_last_consign_key, save_last_consign_key, reset, check_update
 )
-
-
+check_update()
 # Functions:
 def toggle_fullscreen():
     if window.attributes('-fullscreen'):
