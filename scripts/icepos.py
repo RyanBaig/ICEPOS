@@ -1,9 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox, ttk, StringVar, filedialog, simpledialog
 import sqlite3
-import win32print
-import win32ui
-import win32con
 from PIL import Image, ImageDraw, ImageFont, ImageTk
 import screeninfo
 import os
@@ -402,7 +399,7 @@ def create_formatted_image(ship_name, ship_address, ship_desc, ship_dest, ship_s
     draw.text(coordinates["serial_no"], f"{generate_consign_key()}", fill=(0, 0, 0), font=font)
 
     # Save the formatted image
-    background_img.save("formatted_image.png")
+    background_img.save("printable_image.png")
 
     # Show a message box indicating the image creation
     messagebox.showinfo("Image Created", "Formatted image created successfully.")
@@ -411,49 +408,7 @@ def create_formatted_image(ship_name, ship_address, ship_desc, ship_dest, ship_s
 # Print function
 def print_image(image_path):
     try:
-        # Open the image using Pillow (Python Imaging Library)
-        image = Image.open(image_path)
-
-        # Get the default printer
-        printer_name = win32print.GetDefaultPrinter()
-
-        # Create a device context (DC) for the printer
-        hdc = win32ui.CreateDC()
-
-        # Set the printer to the default printer
-        hdc.CreatePrinterDC(printer_name)
-
-        # Start a print job
-        hdc.StartDoc(image_path)
-
-        # Start a page in the print job
-        hdc.StartPage()
-
-        # Get the size of the image in pixels
-        img_width, img_height = image.size
-
-        dpi = 72
-        paper_width = printer_info['pDevMode']['dmPaperWidth'] / 10
-        paper_length = printer_info['pDevMode']['dmPaperLength'] / 10
-
-        # Calculate printable width and height in pixels
-        printable_width = int(paper_width * dpi / 25.4)
-        printable_height = int(paper_length * dpi / 25.4)
-
-        # Calculate the scale factor to fit the image within the printable area
-        scale_factor = min(printable_width / img_width, printable_height / img_height)
-
-        # Calculate the position to center the image
-        x_center = (printable_width - img_width * scale_factor) / 2
-        y_center = (printable_height - img_height * scale_factor) / 2
-
-        # Draw the image on the page
-        hdc.StretchBlt((int(x_center), int(y_center), int(img_width * scale_factor), int(img_height * scale_factor)),
-                       hdc, (0, 0, img_width, img_height), win32print.SRCCOPY)
-
-        # End the page and the print job
-        hdc.EndPage()
-        hdc.EndDoc()
+        os.startfile(os.path.abspath(image_path), "print")
 
         messagebox.showinfo("Printing", "Formatted image sent to printer.")
     except Exception as e:
@@ -492,7 +447,7 @@ def print_formatted_image():
 
         # Print the formatted image
         try:
-            print_image('formatted_image.png')
+            print_image('printable_image.png')
         except Exception as e:
             messagebox.showerror("Printing Error", str(e))
 

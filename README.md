@@ -33,10 +33,17 @@ cd ICEPOS
 
 - Tkinter: Used for creating the graphical user interface, including messagebox, ttk, and filedialog.
 - Sqlite3: Used for working with the SQLite database.
-- pywin32: Utilized for printing functionality using win32print and win32ui.
 - Pillow (PIL): Used for image creation, including Image, ImageDraw, and ImageFont.
+- Pickle: Used for serializing and deserializing data, but in this application to store consignment keys. 
+- Math: used for Math-related operations including Pi values, Sin, Con operations.
+- Time: used to add delays.
+- Datetime: used for retreiving date.
+- Requests: used for checking for any updates for ICEPOS.
+- Subprocess: used in Updating process by cloning the repository using [Git](https://www.git-scm.com).
+- Shutil: Used to delete pre-existing installations of ICEPOS to make room for the New Update.
+- Stat: used for manipulating folder permissions.
 - Screeninfo: Used for obtaining screen information.
-- OS: Used for various operating system-related functionalities.
+- OS: Used for various operating system-related functionalities including printing, finding absolute path of files, etc.
 
 ## Functions
 
@@ -55,6 +62,10 @@ cd ICEPOS
 - `update_dropdown_with_data`: Adds support for the dropdown being used more than once.
 - `close_menu`: Closes the sidebar/menu and works with toggle_menu.
 - `toggle_menu`: Toggles the sidebar/menu and uses close_menu.
+- `on_rm_error`: Used for manipulating .git folder's properties while updating._
+- `git_clone_with_progress`: Clones the repository for updating and shows live progress using messagebox. Uses `on_rm_error` function.
+- `check_update`: Checks if any updation is needed.
+- `execute_check_update`: Starts the updating process. Uses `git_clone_with_progress` function.
 
 
 ### [py_functions.py](scripts/py_functions.py)
