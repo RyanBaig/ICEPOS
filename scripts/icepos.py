@@ -12,6 +12,7 @@ import requests
 import subprocess
 import shutil
 import stat
+import threading
 from py_functions import (
     close_connection, create_db, db_to_dict, delete_db, display_consign_key, generate_consign_key,
     load_last_consign_key, save_last_consign_key
@@ -76,7 +77,6 @@ def git_clone_with_progress(repo_url, destination_path):
     else:
         messagebox.showinfo("Cloning Failed", "Repository cloning failed.")
 
-
 def check_update():
     def execute_check_update():
         time.sleep(1)
@@ -102,19 +102,21 @@ def check_update():
 
         messagebox.showinfo("ICEPOS Update", "ICEPOS has been updated to version " + VERSION)
 
-
     CURRENT_VERSION = "v1.1"
     URL = "https://ice-auth.ryanbaig.repl.co/api/check_update"
-    response = requests.get(URL)
-    if response.status_code == 200:
-        VERSION = response.json()["version"]
+    r = requests.get(URL)
+    if r.status_code == 200:
+        VERSION = r.json()["version"]
         if CURRENT_VERSION != VERSION:
-           result = messagebox.askyesno("Update Needed","An Update has been found, do you want to update ICEPOS right now?")
-           if result:
-               window.destroy()  
-               execute_check_update()
+            result = messagebox.askyesno("Update Needed", "An Update has been found, do you want to update ICEPOS right now?")
+            if result:
+                window.destroy()
+                execute_check_update()
         else:
-            messagebox.showinfo("Update Information","ICEPOS is up to date.")
+            messagebox.showinfo("Update Information", "ICEPOS is up to date.")
+
+
+
 
 
 def exit_win():

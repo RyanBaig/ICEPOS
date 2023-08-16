@@ -4,7 +4,6 @@ import os
 
 # List of packages you want to check
 packages_to_check = [
-    "pywin32",
     "Pillow",
     "screeninfo"
 ]
