@@ -106,7 +106,7 @@ def check_update():
         messagebox.showinfo("ICEPOS Update", "ICEPOS has been updated to version " + VERSION)
 
 
-    CURRENT_VERSION = "v1.0"
+    CURRENT_VERSION = "v1.1"
     URL = "https://ice-auth.ryanbaig.repl.co/api/check_update"
     response = requests.get(URL)
     if response.status_code == 200:
