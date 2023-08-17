@@ -1,7 +1,13 @@
+# [![Release](https://badgers.space//github/release/RyanGamingYT/ICEPOS)](https://github.com/RyanGamingYT/Notepad/releases/tag/v1.1) ![Checks](https://badgers.space//github/checks/RyanGamingYT/ICEPOS) [![License](https://badgers.space//github/license/RyanGamingYT/ICEPOS)](LICENSE.txt) ![Issues](https://badgers.space//github/open-issues/RyanGamingYT/ICEPOS) ![Maintainability](https://badgen.net/codeclimate/maintainability/RyanGamingYT/ICEPOS) ![Languages](https://img.shields.io/github/languages/top/RyanGamingYT/ICEPOS) ![Coverage](https://img.shields.io/codeclimate/coverage/RyanGamingYT/ICEPOS?style=flat&logo=codeclimate)
+
 # ICE POS
 
 ICE POS (Point of Sale) is a Python application created by Me for my father's business. It offers a user-friendly 
 interface for data submission, retrieval, and printing, along with a custom identifier key for shipment identification.
+
+### Disclaimer:
+- This code only works on Windows.
+- It is designed to only work on a monitor with specific Screen Resolution. Remember to modify it to your needs.
 
 ## Installation Instructions:
 - Clone this repo using the following:
@@ -82,5 +88,3 @@ cd ICEPOS
 #### Answers Tab (Sample Answer Selected)
 - ![Answers Tab (Sample Answer Selected)](https://github.com/RyanGamingYT/ICEPOS/blob/master/media/screenshots/Answers%20Tab%20(Sample%20Answer%20Selected).JPG)
 
-## License
-- This Project is Licensed under the [GPL-3.0 License](LICENSE.txt).
