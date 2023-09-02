@@ -86,8 +86,7 @@ cd ICEPOS
 
 
 - `check_packages`: Checks if any packages need to be installed (from [requirements.txt](other/requirements.txt)) when the 
-  program is [run](run.bat). 
-
+  program is [run](run.bat). "
 
 ## Screenshots
 #### Submission Tab (Sidebar Closed)

@@ -4,7 +4,6 @@ import sqlite3
 from PIL import Image, ImageDraw, ImageFont, ImageTk
 import screeninfo
 import os
-import pickle
 from math import sin, pi, cos
 import time
 import datetime
@@ -12,7 +11,6 @@ import requests
 import subprocess
 import shutil
 import stat
-import threading
 from py_functions import (
     close_connection, create_db, db_to_dict, delete_db, display_consign_key, generate_consign_key,
     load_last_consign_key, save_last_consign_key
@@ -102,7 +100,7 @@ def check_update():
 
         messagebox.showinfo("ICEPOS Update", "ICEPOS has been updated to version " + VERSION)
 
-    CURRENT_VERSION = "v1.1"
+    CURRENT_VERSION = "v1.2"
     URL = "https://ice-auth.ryanbaig.repl.co/api/check_update"
     r = requests.get(URL)
     if r.status_code == 200:
@@ -114,8 +112,6 @@ def check_update():
                 execute_check_update()
         else:
             messagebox.showinfo("Update Information", "ICEPOS is up to date.")
-
-
 
 
 
@@ -271,11 +267,11 @@ def refresh_dropdown_and_text():
                     "Date": row[13],
                     "Consignment Key": row[14],
                     "-----": "-----",
-                    "Shipper Name": row[0],
+                    "Shipper Name": shipper_name,
                     "Shipper Address": row[1],
                     "Shipper Contact Number": row[2],
                     "------": "-----",
-                    "Receiver Name": row[6],
+                    "Receiver Name": receiver_name,
                     "Receiver Address": row[7],
                     "Receiver Contact Number": row[8],
                     "Receiver Zipcode": row[9],
@@ -401,7 +397,8 @@ def create_formatted_image(ship_name, ship_address, ship_desc, ship_dest, ship_s
     draw.text(coordinates["serial_no"], f"{generate_consign_key()}", fill=(0, 0, 0), font=font)
 
     # Save the formatted image
-    background_img.save("printable_image.png")
+    current_date = datetime.date.today().strftime("%d--%m--%Y")
+    background_img.save(f"{current_date}.png")
 
     # Show a message box indicating the image creation
     messagebox.showinfo("Image Created", "Formatted image created successfully.")
@@ -415,6 +412,35 @@ def print_image(image_path):
         messagebox.showinfo("Printing", "Formatted image sent to printer.")
     except Exception as e:
         messagebox.showerror("Printing Error", str(e))
+
+def generate_airway_bill_with_terms_and_conditions():
+    # Open the two images you want to combine
+    image_top = Image.open("printable_image.png")
+    image_bottom = Image.open(os.path.abspath("media/images/terms_and_conditions.png"))
+    image_bottom.resize((1350, 700))
+
+    # Get the dimensions of the images
+    width, height = image_top.size
+
+    # Create a new image with the combined height
+    combined_image = Image.new("RGB", (width, height * 2))
+
+    # Create a new image with the same dimensions as the top image
+    combined_image = Image.new("RGB", (width, height * 2))
+
+    # Paste the top image on top and the bottom image on the bottom
+    combined_image.paste(image_top, (0, 0))
+    combined_image.paste(image_bottom, (0, height))
+
+
+    # generate the date aka the file name
+    current_date = datetime.date.today().strftime('%d--%m--%Y')  # Format the date as needed
+
+    # Save the combined image
+    combined_image.save(f"{current_date}.png")
+
+
+
 
 
 def print_formatted_image():
@@ -449,7 +475,10 @@ def print_formatted_image():
 
         # Print the formatted image
         try:
-            print_image('printable_image.png')
+            generate_airway_bill_with_terms_and_conditions()
+            current_date = datetime.date.today().strftime('%d--%m--%Y')  # Format the date as needed
+            print_image(f'{current_date}.png')
+            os.remove(f"{current_date}.png")
         except Exception as e:
             messagebox.showerror("Printing Error", str(e))
 
@@ -657,6 +686,71 @@ except FileNotFoundError:
 
 if saved_username:
     name_button.configure(text=saved_username)
+
+# Create a new tab in the existing ttk.Notebook widget for the "Tracking" tab
+tracking_tab = ttk.Frame(tab_control)
+tab_control.add(tracking_tab, text='Tracking')
+
+# Design and add UI elements for tracking
+tracking_label = ttk.Label(tracking_tab, text="Enter Tracking Number:", font=("Arial", 15))
+tracking_label.pack(pady=10)
+
+tracking_entry = ttk.Entry(tracking_tab, width=30, font=("Arial", 14))
+tracking_entry.pack(pady=5)
+
+def track_package():
+    # Retrieve the tracking number from tracking_entry.get()
+    tracking_number = tracking_entry.get()
+
+
+    url = "https://trackingpackage.p.rapidapi.com/TrackingPackage"
+
+    querystring = {"trackingNumber":tracking_number}
+
+    headers = {
+        "Authorization": "Basic Ym9sZGNoYXQ6TGZYfm0zY2d1QzkuKz9SLw==",
+        "X-RapidAPI-Key": "7a41706b4bmshf2128f270bee0dbp1f8d4ejsn14ec0ee87300",
+        "X-RapidAPI-Host": "trackingpackage.p.rapidapi.com"
+    }
+
+    response = requests.get(url, headers=headers, params=querystring)
+    data = response.json()
+    print(data)
+    # Display tracking information in the tracking_text widget
+    tracking_text.configure(state="normal")
+    tracking_text.delete(1.0, tk.END)  # Clear any existing content
+
+    # Display all TrackingDetails events
+    tracking_text.insert(tk.END, "Important Tracking Details:\n")
+    for event in data.get("TrackingDetails", []):
+        tracking_text.insert(tk.END, "\n")  # Add a line break for separation
+        state = event.get("State")
+        if state:
+            tracking_text.insert(tk.END, f"State: {state}\n")
+
+        city = event.get("City")
+        if city:
+            tracking_text.insert(tk.END, f"City: {city}\n")
+
+        zip_code = event.get("Zip")
+        if zip_code:
+            tracking_text.insert(tk.END, f"Zip Code: {zip_code}\n")
+
+        event_description = event.get("Event")
+        if event_description:
+            tracking_text.insert(tk.END, f"Event: {event_description}\n")
+
+    tracking_text.configure(state="disabled")
+
+
+
+tracking_button = ttk.Button(tracking_tab, text="Track", style="TButton", width=10, command=track_package)
+tracking_button.pack(pady=5)
+
+# Create a Text widget to display tracking information
+tracking_text = tk.Text(tracking_tab, width=80, height=20)
+tracking_text.pack()
+tracking_text.configure(state="disabled")
 
 # Create a button to toggle fullscreen
 fullscreen_button = ttk.Button(sidebar, text="Toggle Fullscreen", command=toggle_fullscreen)
