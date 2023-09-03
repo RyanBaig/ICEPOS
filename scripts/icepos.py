@@ -925,46 +925,11 @@ def track_package():
     """
     # Retrieve the tracking number from tracking_entry.get()
     tracking_number = tracking_entry.get()
+    url = "https://aftership.com/track/"
 
+    import webbrowser
+    webbrowser.open(url+tracking_number)
 
-    url = "https://trackingpackage.p.rapidapi.com/TrackingPackage"
-
-    querystring = {"trackingNumber":tracking_number}
-
-    headers = {
-        "Authorization": "Basic Ym9sZGNoYXQ6TGZYfm0zY2d1QzkuKz9SLw==",
-        "X-RapidAPI-Key": "7a41706b4bmshf2128f270bee0dbp1f8d4ejsn14ec0ee87300",
-        "X-RapidAPI-Host": "trackingpackage.p.rapidapi.com"
-    }
-
-    response = requests.get(url, headers=headers, params=querystring)
-    data = response.json()
-    print(data)
-    # Display tracking information in the tracking_text widget
-    tracking_text.configure(state="normal")
-    tracking_text.delete(1.0, tk.END)  # Clear any existing content
-
-    # Display all TrackingDetails events
-    tracking_text.insert(tk.END, "Important Tracking Details:\n")
-    for event in data.get("TrackingDetails", []):
-        tracking_text.insert(tk.END, "\n")  # Add a line break for separation
-        state = event.get("State")
-        if state:
-            tracking_text.insert(tk.END, f"State: {state}\n")
-
-        city = event.get("City")
-        if city:
-            tracking_text.insert(tk.END, f"City: {city}\n")
-
-        zip_code = event.get("Zip")
-        if zip_code:
-            tracking_text.insert(tk.END, f"Zip Code: {zip_code}\n")
-
-        event_description = event.get("Event")
-        if event_description:
-            tracking_text.insert(tk.END, f"Event: {event_description}\n")
-
-    tracking_text.configure(state="disabled")
 
 # Function to initiate tracking in a separate thread
 def track_package_thread():
@@ -982,11 +947,6 @@ def track_package_thread():
 
 tracking_button = ttk.Button(tracking_tab, text="Track", style="TButton", width=10, command=track_package_thread)
 tracking_button.pack(pady=5)
-
-# Create a Text widget to display tracking information
-tracking_text = tk.Text(tracking_tab, width=80, height=20)
-tracking_text.pack()
-tracking_text.configure(state="disabled")
 
 # Create a button to toggle fullscreen
 fullscreen_button = ttk.Button(sidebar, text="Toggle Fullscreen", command=toggle_fullscreen)

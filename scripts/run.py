@@ -5,7 +5,9 @@ import os
 # List of packages you want to check
 packages_to_check = [
     "Pillow",
-    "screeninfo"
+    "screeninfo",
+    "requests",
+    "ttkbootstrap"
 ]
 
 def check_packages(packages):
