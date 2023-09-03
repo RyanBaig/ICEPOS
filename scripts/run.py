@@ -11,6 +11,15 @@ packages_to_check = [
 ]
 
 def check_packages(packages):
+    """
+    Checks if the given packages are installed.
+
+    Args:
+        packages (list): A list of package names to check.
+
+    Returns:
+        list: A list of missing packages.
+    """
     missing_packages = []
 
     for package in packages:

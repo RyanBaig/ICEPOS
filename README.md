@@ -2,25 +2,31 @@
 
 # ICE POS
 
-ICE POS (Point of Sale) is a Python application created by Me for my father's business. It offers a user-friendly 
+ICE POS (Point of Sale) is a Python application created by Me for my father's business. It offers a user-friendly
 interface for data submission, retrieval, and printing, along with a custom identifier key for shipment identification.
 
-### Disclaimer:
+### Disclaimer
+
 - This code only works on Windows.
 - It is designed to only work on a monitor with specific Screen Resolution. Remember to modify it to your needs.
 
-## Installation Instructions:
+## Installation Instructions
+
 - Clone this repo using the following:
+
 ```bash
 git clone https://github.com/RyanGamingYT/ICEPOS
 ```
+
 - Navigate to the project directory using:
+
 ```bash
 cd ICEPOS
 ```
+
 - Type `run.bat` or `./run.bat` if you are using Windows Powershell.
 - It will automatically install all dependencies (if needed) for the app to work.
-- If you want to use it frequently then create a shortcut ([ICEPOS.ink](ICE%20POS.lnk)) for the `run.bat` file. 
+- If you want to use it frequently then create a shortcut ([ICEPOS.ink](ICE%20POS.lnk)) for the `run.bat` file.
 
 ## Features
 
@@ -34,7 +40,7 @@ cd ICEPOS
 - Tkinter: Used for creating the graphical user interface, including messagebox, ttk, and filedialog.
 - Sqlite3: Used for working with the SQLite database.
 - Pillow (PIL): Used for image creation, including Image, ImageDraw, and ImageFont.
-- Pickle: Used for serializing and deserializing data, but in this application to store consignment keys. 
+- Pickle: Used for serializing and deserializing data, but in this application to store consignment keys.
 - Math: used for Math-related operations including Pi values, Sin, Con operations.
 - Time: used to add delays.
 - Datetime: used for retreiving date.
@@ -45,7 +51,6 @@ cd ICEPOS
 - Screeninfo: Used for obtaining screen information.
 - OS: Used for various operating system-related functionalities including printing, finding absolute path of files, etc.
 - ttkbootstrap: Used for Styling the App and adding the DateEntry.
-
 
 ## Screenshots
 
