@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox, ttk, StringVar, filedialog, simpledialog
+from tkinter import messagebox, StringVar, filedialog, simpledialog
 import sqlite3
 from PIL import Image, ImageDraw, ImageFont, ImageTk
 import screeninfo
@@ -11,6 +11,10 @@ import requests
 import subprocess
 import shutil
 import stat
+import ttkbootstrap as ttk
+from ttkbootstrap import Style
+from ttkbootstrap.widgets import DateEntry
+import threading
 from py_functions import (
     close_connection, create_db, db_to_dict, delete_db, display_consign_key, generate_consign_key,
     load_last_consign_key, save_last_consign_key
@@ -18,11 +22,34 @@ from py_functions import (
 
 # Functions:
 def on_rm_error(func, path, exc_info):
+
+    """
+    A function that is called when an error occurs while removing a file or directory.
+
+    Parameters:
+        func (callable): The function that raised the exception.
+        path (str): The path of the file or directory that caused the error.
+        exc_info (tuple): Information about the exception that was raised.
+
+    Returns:
+        None
+    """
+
     # Change permissions to allow write and then unlink
     os.chmod(path, stat.S_IWRITE)
     os.unlink(path)
 
 def git_clone_with_progress(repo_url, destination_path):
+    """
+    Clones a Git repository from the specified URL to the given destination path.
+
+    Parameters:
+        repo_url (str): The URL of the Git repository to clone.
+        destination_path (str): The path where the repository will be cloned.
+
+    Returns:
+        None
+    """
     # Create a Tkinter window for the message box
     root = tk.Tk()
     root.withdraw()  # Hide the main window
@@ -64,19 +91,52 @@ def git_clone_with_progress(repo_url, destination_path):
         if not line:
             break
         progress_message += line
-        messagebox.showinfo("Cloning Progress", progress_message)
+        messagebox.showinfo("Cloning Progress", progress_message, icon="info")
 
     # Close the subprocess
     process.communicate()
 
     # Show a final message box with the completion status
     if process.returncode == 0:
-        messagebox.showinfo("Cloning Completed", "Repository cloned successfully!")
+        messagebox.showinfo("Cloning Completed", "Repository cloned successfully!", icon="info")
     else:
-        messagebox.showinfo("Cloning Failed", "Repository cloning failed.")
+        messagebox.showinfo("Cloning Failed", "Repository cloning failed.", icon="info")
 
 def check_update():
-    def execute_check_update():
+    """
+    Function to check for updates and execute the update process if necessary.
+
+    This function checks for updates by making a GET request to the specified URL.
+    If an update is available, it prompts the user with a message box asking if they
+    want to update. If the user chooses to update, it executes the update process
+    by performing the following steps:
+
+    1. Sleep for 1 second.
+    2. Close the connection.
+    3. Get the current directory of the script.
+    4. Move to a different directory to avoid being inside the target directory.
+    5. Remove the target directory if it exists.
+    6. Clone the repository from the specified URL to the specified target directory.
+    7. Show an info message box indicating that the update has been completed.
+
+    The update process is executed in a separate thread to avoid blocking the main thread.
+
+    Parameters:
+    None
+
+    Returns:
+    None
+    """
+    def execute_check_update(VERSION):
+        """
+        Executes a check and update process for the specified version.
+        
+        Args:
+            VERSION (str): The version to check and update.
+        
+        Returns:
+            None
+        """
         time.sleep(1)
         close_connection()
 
@@ -98,24 +158,54 @@ def check_update():
         # Clone the repository
         git_clone_with_progress("https://github.com/RyanGamingYT/ICEPOS", "C:\\Users\\Hp\\Downloads\\ICEPOS")
 
-        messagebox.showinfo("ICEPOS Update", "ICEPOS has been updated to version " + VERSION)
+        messagebox.showinfo("ICEPOS Update", "ICEPOS has been updated to version " + VERSION, icon="info")
 
-    CURRENT_VERSION = "v1.2"
-    URL = "https://ice-auth.ryanbaig.repl.co/api/check_update"
-    r = requests.get(URL)
-    if r.status_code == 200:
-        VERSION = r.json()["version"]
-        if CURRENT_VERSION != VERSION:
-            result = messagebox.askyesno("Update Needed", "An Update has been found, do you want to update ICEPOS right now?")
-            if result:
-                window.destroy()
-                execute_check_update()
-        else:
-            messagebox.showinfo("Update Information", "ICEPOS is up to date.")
+    def check_update_background():
+        """
+        Check for updates in the background.
 
+        This function sends a GET request to the specified URL to check for updates.
+        If the response status code is 200, it extracts the version number from the JSON
+        response and compares it with the current version. If they are not the same, it
+        prompts the user with a messagebox asking if they want to update. If the user
+        confirms, it destroys the current window and calls the `execute_check_update`
+        function with the new version. If the version numbers are the same, it displays
+        a messagebox informing the user that the application is up to date.
+
+        Parameters:
+        None
+
+        Returns:
+        None
+        """
+        CURRENT_VERSION = "v1.2"
+        URL = "https://ice-auth.ryanbaig.repl.co/api/check_update"
+        r = requests.get(URL)
+        if r.status_code == 200:
+            VERSION = r.json()["version"]
+            if CURRENT_VERSION != VERSION:
+                result = messagebox.askyesno("Update Needed", "An Update has been found, do you want to update ICEPOS right now?")
+                if result:
+                    window.destroy()
+                    execute_check_update(VERSION)
+            else:
+                messagebox.showinfo("Update Information", "ICEPOS is up to date.", icon="info")
+
+    # Run the update check in a separate thread
+    update_thread = threading.Thread(target=check_update_background)
+    update_thread.start()
 
 
 def exit_win():
+    """
+    Asks the user for confirmation and closes the connection and destroys the window if the user agrees.
+
+    Parameters:
+    None
+
+    Returns:
+    None
+    """
     result = messagebox.askyesno("Confirmation", "Do you want to proceed?")
     if result:
         close_connection()
@@ -123,6 +213,15 @@ def exit_win():
 
 
 def reset():
+    """
+    Resets the database connection and performs a series of actions to reset the application.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
     global conn
     conn = sqlite3.connect(os.path.abspath("other\\ice-answers.db"))
     result = messagebox.askyesno("Confirmation", "Do you want to proceed?")
@@ -142,6 +241,21 @@ def reset():
 
 
 def toggle_fullscreen():
+    """
+    Toggle the fullscreen mode of the window.
+
+    This function checks if the window is currently in fullscreen mode using the 
+    `attributes` method with the argument '-fullscreen'. If the window is already in 
+    fullscreen mode, it sets the '-fullscreen' attribute to False to toggle it off. 
+    If the window is not in fullscreen mode, it sets the '-fullscreen' attribute to 
+    True to toggle it on.
+
+    Parameters:
+        None
+
+    Returns:
+        None
+    """
     if window.attributes('-fullscreen'):
         window.attributes('-fullscreen', False)
     elif not window.attributes('-fullscreen'):
@@ -149,6 +263,12 @@ def toggle_fullscreen():
 
 
 def get_username():
+    """
+    Prompts the user to enter their username and saves it to a file.
+
+    Returns:
+        None
+    """
     name = simpledialog.askstring("Username", "Please enter your username")
     if name:
         with open(file=os.path.abspath("other\\username.txt"), mode="w") as file:
@@ -157,6 +277,15 @@ def get_username():
 
 
 def change_profile_pic():
+    """
+    Opens a file dialog to allow the user to select an image file and change the profile picture.
+    
+    Parameters:
+        None
+        
+    Returns:
+        None
+    """
     file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.jpg *.jpeg *.png *.svg")])
     if file_path:
         rectangular_image = Image.open(file_path)
@@ -179,19 +308,31 @@ def change_profile_pic():
             file.write(file_path)
 
 
-def fill_current_date():
-    current_date = datetime.date.today().strftime('%d/%m/%Y')  # Format the date as needed
-    entry_date.delete(0, tk.END)  # Clear any existing content in the entry
-    entry_date.insert(0, current_date)  # Insert the current date into the entry
-
-
 def toggle_menu():
+    """
+    Toggles the menu by animating the sidebar to slide in or out.
+
+    Parameters:
+        None
+
+    Returns:
+        None
+    """
     current_x = sidebar.winfo_x()
     target_x = -350 if current_x >= 0 else 0
     animate_sidebar(target_x)
 
 
 def close_menu():
+    """
+    Closes the menu by setting the animation direction to close and animating the sidebar to the target position.
+
+    Parameters:
+        None
+
+    Returns:
+        None
+    """
     global animation_direction
     animation_direction = 0  # Set direction to close
     target_x = -300  # Target position for closing the sidebar
@@ -199,6 +340,15 @@ def close_menu():
 
 
 def animate_sidebar(target_x):
+    """
+    Animate the sidebar to a target x position.
+
+    Parameters:
+        target_x (int): The x position to animate the sidebar to.
+
+    Returns:
+        None
+    """
     start_x = sidebar.winfo_x()
     distance = target_x - start_x
     duration = 20  # Number of frames for the animation
@@ -214,6 +364,21 @@ def animate_sidebar(target_x):
 
 # Function to display the selected answer in the Text widget
 def display_selected_answer():
+    """
+    Display the selected answer in the answers_text widget.
+
+    This function updates the dropdown and text with the latest data and then
+    fetches the selected answer data from the dropdown.rows dictionary. If the
+    selected answer data is not found, the function returns without making any
+    changes. Otherwise, it formats and displays all fields of the selected
+    answer in the answers_text widget.
+
+    Parameters:
+    None
+
+    Returns:
+    None
+    """
     try:
         # Update the dropdown and text with latest data
         refresh_dropdown_and_text()
@@ -244,6 +409,16 @@ def display_selected_answer():
 
 # Function to update the dropdown and text widget when the Refresh button is clicked
 def refresh_dropdown_and_text():
+    """
+    Refreshes the dropdown menu and text fields with data from the database.
+    If there are no records in the database, no changes are made.
+    
+    Parameters:
+        None
+        
+    Returns:
+        None
+    """
     try:
         # Fetch data from the database
         cursor.execute('SELECT * FROM answers')
@@ -293,6 +468,15 @@ def refresh_dropdown_and_text():
 
 
 def submit():
+    """
+    This function is responsible for submitting the form data to the database.
+
+    Parameters:
+        None
+
+    Returns:
+        None
+    """
     try:
         # Fetch data from the input fields
         ship_name = entry_ship_name.get()
@@ -341,7 +525,7 @@ def submit():
             conn.commit()  # Commit the changes to the database
             # Refresh the dropdown and display the updated data in the Text widget
             refresh_dropdown_and_text()
-            messagebox.showinfo("Data Submission", "Data Submitted Successfully")
+            messagebox.showinfo("Data Submission", "Data Submitted Successfully", icon="info")
     except Exception as e:
         print("Error in submit function:", str(e))
         pass
@@ -350,6 +534,29 @@ def submit():
 # Function to create a formatted image
 def create_formatted_image(ship_name, ship_address, ship_desc, ship_dest, ship_serv, rec_name, rec_address, rec_zipcode,
                            ship_weight, ship_charges, no_of_pieces, date, ship_contact, rec_contact, serial_no):
+    """
+    Create a formatted image using the given information and save it as a PNG file.
+    
+    Args:
+        ship_name (str): The name of the ship.
+        ship_address (str): The address of the ship.
+        ship_desc (str): The description of the ship.
+        ship_dest (str): The destination of the ship.
+        ship_serv (str): The service of the ship.
+        rec_name (str): The name of the recipient.
+        rec_address (str): The address of the recipient.
+        rec_zipcode (str): The zipcode of the recipient.
+        ship_weight (str): The weight of the shipment.
+        ship_charges (str): The charges for the shipment.
+        no_of_pieces (str): The number of pieces in the shipment.
+        date (str): The date of the shipment.
+        ship_contact (str): The contact information of the ship.
+        rec_contact (str): The contact information of the recipient.
+        serial_no (str): The serial number of the shipment.
+        
+    Returns:
+        None
+    """
     # Load the background image
     background_img = Image.open(os.path.abspath("media\\images\\airway_bill_for_printing.png"))
     print("Inside create_formatted_image function...")
@@ -401,19 +608,39 @@ def create_formatted_image(ship_name, ship_address, ship_desc, ship_dest, ship_s
     background_img.save(f"{current_date}.png")
 
     # Show a message box indicating the image creation
-    messagebox.showinfo("Image Created", "Formatted image created successfully.")
+    messagebox.showinfo("Image Created", "Formatted image created successfully.", icon="info")
 
 
 # Print function
 def print_image(image_path):
+    """
+    Print the image located at the given image_path.
+
+    Parameters:
+        image_path (str): The path to the image file.
+
+    Returns:
+        None
+    """
     try:
         os.startfile(os.path.abspath(image_path), "print")
 
-        messagebox.showinfo("Printing", "Formatted image sent to printer.")
+        messagebox.showinfo("Printing", "Formatted image sent to printer.", icon="info")
     except Exception as e:
         messagebox.showerror("Printing Error", str(e))
 
 def generate_airway_bill_with_terms_and_conditions():
+    """
+    Generates an airway bill with terms and conditions.
+
+    Opens two images, `printable_image.png` and `terms_and_conditions.png`, and combines them into a single image.
+    The `terms_and_conditions.png` image is resized to a width of 1350 and a height of 700 to match the dimensions of the `printable_image.png` image.
+    The dimensions of the `printable_image.png` image are obtained using the `size()` method.
+    A new image with the combined height of the two images is created using the `new()` method.
+    The `paste()` method is used to paste the `printable_image.png` image on top and the `terms_and_conditions.png` image at the bottom of the combined image.
+    The current date is obtained using the `date.today()` method and formatted as `dd--mm--YYYY`.
+    The combined image is saved with the filename as the current date in the format `dd--mm--YYYY.png`.
+    """
     # Open the two images you want to combine
     image_top = Image.open("printable_image.png")
     image_bottom = Image.open(os.path.abspath("media/images/terms_and_conditions.png"))
@@ -440,10 +667,16 @@ def generate_airway_bill_with_terms_and_conditions():
     combined_image.save(f"{current_date}.png")
 
 
-
-
-
 def print_formatted_image():
+    """
+    Fetches data from input fields and creates a formatted image.
+
+    Parameters:
+        None.
+
+    Returns:
+        None.
+    """
     # Fetch data from the input fields
     ship_name = entry_ship_name.get()
     ship_address = entry_ship_address.get()
@@ -456,7 +689,7 @@ def print_formatted_image():
     ship_weight = entry_ship_weight.get()
     ship_charges = entry_ship_charges.get()
     no_of_pieces = entry_no_of_pieces.get()
-    date = entry_date.get()
+    date = entry_date.entry.get()
     ship_contact = entry_ship_contact.get()
     rec_contact = entry_rec_contact.get()
 
@@ -464,8 +697,8 @@ def print_formatted_image():
     entries = [entry_ship_name, entry_ship_address, entry_ship_desc, entry_ship_dest, entry_ship_serv,
                entry_rec_name, entry_rec_address, entry_rec_zipcode, entry_ship_weight, entry_ship_charges,
                entry_no_of_pieces,
-               entry_date, entry_ship_contact, entry_rec_contact]
-    values = [entry.get() for entry in entries]
+            entry_ship_contact, entry_rec_contact]
+    values = [entry.get() for entry in entries] + [entry_date.entry.get()]
     if any(value == '' for value in values):
         messagebox.showerror("Error", "All fields are required!")
     else:
@@ -489,27 +722,16 @@ screen_info = screeninfo.get_monitors()[0]
 # Retrieve the monitor width and height
 width = screen_info.width
 height = screen_info.height
+icon = os.path.abspath("media/images/icon.ico")
 
 # Create the Tkinter window and set size and icon
-window = tk.Tk()
+window = ttk.Window()
 window.title("ICE AIRWAY BILL")
 window.geometry(f"{width}x{height}")
-window.iconbitmap(os.path.abspath("media/images/icon.ico"))
+window.iconbitmap(icon)
 
-# Set the style for ttk widgets
-style = ttk.Style()
-
-# Use a custom theme to create a more modern look
-style.theme_use("clam")  # Options: "clam", "alt", "default", "classic"
-
-# Customize the tttk.Entry widget appearance
-style.configure("TEntry", padding=5, font=("Arial", 14))
-
-# Customize the tttk.Button widget appearance
-style.configure("TButton", padding=2, font=("Arial", 12))
-
-# Customize the ttk.Combobox widget appearance
-style.configure("TCombobox", padding=5, font=("Arial", 14))
+# Add the TTKBootstrap Theme
+style = Style("litera")
 
 # Create a Tab Control
 tab_control = ttk.Notebook(window)
@@ -544,7 +766,7 @@ sidebar.place(x=-300, y=0, relheight=1, anchor=tk.NW)
 
 # Create the hamburger button using the PNG icon
 menu_icon = tk.PhotoImage(file=os.path.abspath("media/images/menu.png"))
-hamburger = tk.Button(submission_canvas, image=menu_icon, command=toggle_menu, bd=0)
+hamburger = ttk.Button(submission_canvas, image=menu_icon, command=toggle_menu, style="Light.TButton")
 hamburger.place(x=10, y=10, anchor=tk.NW)  # Position the hamburger button in the top-left corner
 
 personal_info_label = ttk.Label(sidebar, text="Personal Information", font=("Arial", 15))
@@ -576,7 +798,7 @@ else:
 circular_image_tk = ImageTk.PhotoImage(circular_image)
 
 # Create the profile button using the loaded/saved image
-profile_b = tk.Button(sidebar, image=circular_image_tk, command=change_profile_pic, bd=0, height=120, width=120)
+profile_b = ttk.Button(sidebar, image=circular_image_tk, command=change_profile_pic, style="Light.TButton")
 profile_b.image = circular_image_tk  # Store the reference to avoid image garbage collection
 profile_b.pack(pady=5)
 
@@ -599,11 +821,8 @@ entry_ship_contact = ttk.Entry(submission_tab, width=24, font=("Arial", 14), sty
 entry_ship_contact.place(x=45, y=490)
 
 # Shipment Date (5)
-entry_date = ttk.Entry(submission_tab, width=23, font=("Arial", 14), style="TEntry")
-entry_date.place(x=697, y=180)
-
-fill_c_date = ttk.Button(submission_tab, text="Fill Current Date", command=fill_current_date, style="TButton")
-fill_c_date.place(x=760, y=150)
+entry_date = DateEntry(submission_tab, bootstyle='primary', width=37)
+entry_date.place(x=697, y=190)
 
 # Shipment Destination (6)
 entry_ship_dest = ttk.Entry(submission_tab, width=28, font=("Arial", 14), style="TEntry")
@@ -699,6 +918,11 @@ tracking_entry = ttk.Entry(tracking_tab, width=30, font=("Arial", 14))
 tracking_entry.pack(pady=5)
 
 def track_package():
+    """
+    Retrieves the tracking number from the tracking_entry widget and uses it to make an API request to retrieve tracking information for a package. 
+
+    :return: None
+    """
     # Retrieve the tracking number from tracking_entry.get()
     tracking_number = tracking_entry.get()
 
@@ -742,9 +966,21 @@ def track_package():
 
     tracking_text.configure(state="disabled")
 
+# Function to initiate tracking in a separate thread
+def track_package_thread():
+    """
+    Create and start a new thread to track the package.
 
+    This function creates a new thread using the `threading.Thread` class and sets the target to the `track_package` function. The `track_package` function is responsible for tracking the package and updating its status. Once the thread is created, it is started using the `start` method.
 
-tracking_button = ttk.Button(tracking_tab, text="Track", style="TButton", width=10, command=track_package)
+    This function does not have any parameters.
+
+    This function does not return anything.
+    """
+    tracking_thread = threading.Thread(target=track_package)
+    tracking_thread.start()
+
+tracking_button = ttk.Button(tracking_tab, text="Track", style="TButton", width=10, command=track_package_thread)
 tracking_button.pack(pady=5)
 
 # Create a Text widget to display tracking information
@@ -786,6 +1022,15 @@ answer_dropdown.pack()
 
 
 def refresh_dropdown():
+    """
+    Refreshes the dropdown menu with the shipper and receiver names from the 'answers' table in the database.
+
+    Parameters:
+    None
+
+    Returns:
+    None
+    """
     cursor.execute('SELECT shipper_name, receiver_name FROM answers')
     shipper_receiver_names = cursor.fetchall()
     answer_dropdown["values"] = [f"{shipper[0]} - {shipper[1]}" for shipper in shipper_receiver_names]
@@ -793,6 +1038,19 @@ def refresh_dropdown():
 
 # Function to update the dropdown with shipper-receiver names
 def update_dropdown_with_data():
+    """
+    Update the dropdown widget with data from the database.
+
+    This function retrieves data from the database using the `db_to_dict` function
+    and updates the values of the `answer_dropdown` widget. The `answer_dropdown`
+    widget is a dropdown widget that allows users to select from a list of options.
+
+    Parameters:
+        None
+
+    Returns:
+        None
+    """
     ans = db_to_dict()
     answer_dropdown["values"] = list(ans.keys())
     answer_dropdown.rows = ans

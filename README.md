@@ -44,6 +44,7 @@ cd ICEPOS
 - Stat: used for manipulating folder permissions.
 - Screeninfo: Used for obtaining screen information.
 - OS: Used for various operating system-related functionalities including printing, finding absolute path of files, etc.
+- ttkbootstrap: Used for Styling the App and adding the DateEntry.
 
 ## Functions
 
@@ -66,6 +67,7 @@ cd ICEPOS
 - `git_clone_with_progress`: Clones the repository for updating and shows live progress using messagebox. Uses `on_rm_error` function.
 - `check_update`: Checks if any updation is needed.
 - `execute_check_update`: Starts the updating process. Uses `git_clone_with_progress` function.
+- 
 
 
 ### [py_functions.py](scripts/py_functions.py)
