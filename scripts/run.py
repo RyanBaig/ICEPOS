@@ -1,6 +1,7 @@
 import pkgutil
 import importlib
 import os
+from os.path import abspath
 
 # List of packages you want to check
 packages_to_check = [
@@ -34,7 +35,8 @@ if missing_packages:
     print("Missing packages:")
     for package in missing_packages:
         print(package)
-    os.system("pip install -r other\\requirements.txt")
+    requirements_file = abspath("other\\requirements.txt")
+    os.system("pip install -r " + requirements_file)
     os.system("python scripts\\icepos.py")
 else:
     print("All required packages are installed.")

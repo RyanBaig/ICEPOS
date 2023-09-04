@@ -239,7 +239,7 @@ def reset():
         create_db()
         window.destroy()
 
-
+create_db()
 def toggle_fullscreen():
     """
     Toggle the fullscreen mode of the window.
@@ -469,12 +469,12 @@ def refresh_dropdown_and_text():
 
 def submit():
     """
-    This function is responsible for submitting the form data to the database.
-
-    Parameters:
-        None
-
+    Submit the form data to the database, send notifications, and display success message.
+    
     Returns:
+        None
+    
+    Raises:
         None
     """
     try:
@@ -490,14 +490,12 @@ def submit():
         ship_weight = entry_ship_weight.get()
         ship_charges = entry_ship_charges.get()
         no_of_pieces = entry_no_of_pieces.get()
-        date = entry_date.get()
+        date = entry_date.entry.get()
         ship_contact = entry_ship_contact.get()
         rec_contact = entry_rec_contact.get()
 
         # Check if any field is empty
-        if any(value == '' for value in
-               [ship_name, ship_address, ship_desc, ship_dest, ship_serv, rec_name, rec_address, rec_zipcode,
-                ship_weight, ship_charges, no_of_pieces, date, ship_contact, rec_contact]):
+        if any(value == '' for value in [ship_name, ship_address, ship_desc, ship_dest, ship_serv, rec_name, rec_address, rec_zipcode, ship_weight, ship_charges, no_of_pieces, date, ship_contact, rec_contact]):
             messagebox.showerror("Error", "All fields are required!")
         else:
             # Insert the data into the database
@@ -519,16 +517,92 @@ def submit():
                     date,
                     consign_identifier
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-""", (ship_name, ship_address, ship_contact, ship_desc, ship_dest, ship_serv, rec_name, rec_address, rec_contact,
-      rec_zipcode, ship_weight, ship_charges, no_of_pieces, date, generate_consign_key()))
+""", (ship_name, ship_address, ship_contact, ship_desc, ship_dest, ship_serv, rec_name, rec_address, rec_contact, rec_zipcode, ship_weight, ship_charges, no_of_pieces, date, generate_consign_key()))
 
             conn.commit()  # Commit the changes to the database
             # Refresh the dropdown and display the updated data in the Text widget
             refresh_dropdown_and_text()
-            messagebox.showinfo("Data Submission", "Data Submitted Successfully", icon="info")
+
+            def send_notification_and_data(info):
+                """
+                Send a push notification and data to the specified URL and headers using the Pusher API.
+                
+                Args:
+                    info (dict): The data payload for the Pusher notification.
+                    
+                Returns:
+                    None
+                    
+                Raises:
+                    None
+                """
+                import json
+                # Define the URL and headers for the Pusher notification
+                pusher_url = "https://bd6732cb-f1df-40a9-bf10-1b39a5beeb90.pushnotifications.pusher.com/publish_api/v1/instances/bd6732cb-f1df-40a9-bf10-1b39a5beeb90/publishes"
+                pusher_headers = {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer 7A770E61F964B0D25F15CB9470F250EEFF9486967B17E7CF636C25E1ED1E122E"
+                }
+
+                # Define the data payload for the Pusher notification
+                pusher_data = {
+                    "interests": ["hello"],
+                    "web": {
+                        "notification": {
+                            "title": "New Shipment Booked",
+                            "body": "Hello, A new Shipment has been booked."
+                        }
+                    }
+                }
+
+                # Send the POST request with JSON data for Pusher notification
+                pusher_response = requests.post(pusher_url, headers=pusher_headers, json=pusher_data)
+
+                # Check the response for Pusher notification
+                if pusher_response.status_code == 200:
+                    print("Pusher notification sent successfully.")
+                else:
+                    print(f"Error sending Pusher notification: {pusher_response.status_code} - {pusher_response.text}")
+
+                # Define the headers with Content-Type as application/json for the second request
+                info_headers = {
+                    "Content-Type": "application/json"
+                }
+
+                json_info = json.dumps(info)
+
+                # Send an empty JSON object as the request body for the second request
+                info_url = "https://ice-auth.ryanbaig.repl.co/notifications"
+                info_response = requests.post(info_url, data=json_info, headers=info_headers)
+
+                # Check the response for the second request
+                if info_response.status_code == 200:
+                    print("Notification data sent successfully.")
+                else:
+                    print(f"Error sending notification data: {info_response.status_code} - {info_response.text}")
+
+            data = {
+                'ship_name': ship_name,
+                'ship_address': ship_address,
+                'ship_desc': ship_desc,
+                'ship_dest': ship_dest,
+                'ship_serv': ship_serv,
+                'rec_name': rec_name,
+                'rec_address': rec_address,
+                'rec_zipcode': rec_zipcode,
+                'ship_weight': ship_weight,
+                'ship_charges': ship_charges,
+                'no_of_pieces': no_of_pieces,
+                'date': date,
+                'ship_contact': ship_contact,
+                'rec_contact': rec_contact
+            }
+            send_notification_and_data(info=data)
+            messagebox.showinfo("Data Submission", "Data Submitted Successfully!", icon="info")
     except Exception as e:
         print("Error in submit function:", str(e))
         pass
+
 
 
 # Function to create a formatted image
