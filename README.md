@@ -64,24 +64,24 @@ cd ICEPOS
 
 #### Submission Tab (Sidebar Closed)
 
-- ![Submission Tab (Sidebar Closed)](https://github.com/RyanGamingYT/ICEPOS/blob/master/media/screenshots/Submission%20Tab%20(Sidebar%20Closed).JPG)
+- ![Submission Tab (Sidebar Closed)](screenshots/Submission%20Tab%20(Sidebar%20Closed).JPG)
 
 #### Submission Tab (Sidebar Open)
 
-- ![Submission Tab (Sidebar Open)](https://github.com/RyanGamingYT/ICEPOS/blob/master/media/screenshots/Submission%20Tab%20(Sidebar%20Open).JPG)
+- ![Submission Tab (Sidebar Open)](screenshots/Submission%20Tab%20(Sidebar%20Open).JPG)
 
 #### Answers Tab (No Answer Selected)
 
-- ![Answers Tab (No Answer Selected)](https://github.com/RyanGamingYT/ICEPOS/blob/master/media/screenshots/Answers%20Tab%20(No%20Answer%20Selected).JPG)
+- ![Answers Tab (No Answer Selected)](screenshots/Answers%20Tab%20(No%20Answer%20Selected).JPG)
 
 #### Answers Tab (Sample Answer Selected)
 
-- ![Answers Tab (Sample Answer Selected)](https://github.com/RyanGamingYT/ICEPOS/blob/master/media/screenshots/Answers%20Tab%20(Sample%20Answer%20Selected).JPG)
+- ![Answers Tab (Sample Answer Selected)](screenshots/Answers%20Tab%20(Sample%20Answer%20Selected).JPG)
 
 #### Tracking Tab (No Tracking Number Added)
 
-- ![Tracking Tab (No Tracking Number Added)](media/screenshots/Tracking%20Tab%20(No%20Tracking%20Number%20Added).JPG)
+- ![Tracking Tab (No Tracking Number Added)](screenshots/Tracking%20Tab%20(No%20Tracking%20Number%20Added).JPG)
 
 #### Tracking Tab (Sample UPS Tracking Number Added)
 
-- ![Tracking Tab (Sample UPS Tracking Number Selected)](media/screenshots/Tracking%20Tab%20(Sample%20UPS%20Tracking%20Number%20Added).JPG)
+- ![Tracking Tab (Sample UPS Tracking Number Selected)](screenshots/Tracking%20Tab%20(Sample%20UPS%20Tracking%20Number%20Added).JPG)
