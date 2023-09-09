@@ -176,7 +176,7 @@ def check_update():
         Returns:
         None
         """
-        CURRENT_VERSION = "v1.2"
+        CURRENT_VERSION = "v1.3"
         URL = "https://ice-auth.ryanbaig.repl.co/api/check_update"
         r = requests.get(URL)
         if r.status_code == 200:
