@@ -4,7 +4,7 @@ import sqlite3
 from PIL import Image, ImageDraw, ImageFont, ImageTk
 import screeninfo
 import os
-from math import sin, pi, cos
+from math import pi, cos
 import time
 import datetime
 import requests
@@ -15,13 +15,11 @@ import ttkbootstrap as ttk
 from ttkbootstrap import Style
 from ttkbootstrap.widgets import DateEntry
 import threading
-from py_functions import (
-    close_connection, create_db, db_to_dict, delete_db, display_consign_key, generate_consign_key,
-    load_last_consign_key, save_last_consign_key
-)
+from py_functions import close_connection, create_db, db_to_dict, delete_db, display_consign_key, generate_consign_key
+
 
 # Functions:
-def on_rm_error(func, path, exc_info):
+def on_rm_error(path):
 
     """
     A function that is called when an error occurs while removing a file or directory.
@@ -91,16 +89,16 @@ def git_clone_with_progress(repo_url, destination_path):
         if not line:
             break
         progress_message += line
-        messagebox.showinfo("Cloning Progress", progress_message, icon="info")
+        messagebox.showinfo("Cloning Progress", progress_message)
 
     # Close the subprocess
     process.communicate()
 
     # Show a final message box with the completion status
     if process.returncode == 0:
-        messagebox.showinfo("Cloning Completed", "Repository cloned successfully!", icon="info")
+        messagebox.showinfo("Cloning Completed", "Repository cloned successfully!")
     else:
-        messagebox.showinfo("Cloning Failed", "Repository cloning failed.", icon="info")
+        messagebox.showinfo("Cloning Failed", "Repository cloning failed.")
 
 def check_update():
     """
@@ -158,7 +156,7 @@ def check_update():
         # Clone the repository
         git_clone_with_progress("https://github.com/RyanGamingYT/ICEPOS", "C:\\Users\\Hp\\Downloads\\ICEPOS")
 
-        messagebox.showinfo("ICEPOS Update", "ICEPOS has been updated to version " + VERSION, icon="info")
+        messagebox.showinfo("ICEPOS Update", "ICEPOS has been updated to version " + VERSION)
 
     def check_update_background():
         """
@@ -189,7 +187,7 @@ def check_update():
                     window.destroy()
                     execute_check_update(VERSION)
             else:
-                messagebox.showinfo("Update Information", "ICEPOS is up to date.", icon="info")
+                messagebox.showinfo("Update Information", "ICEPOS is up to date.")
 
     # Run the update check in a separate thread
     update_thread = threading.Thread(target=check_update_background)
@@ -287,7 +285,10 @@ def change_profile_pic():
         None
     """
     file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.jpg *.jpeg *.png *.svg")])
-    if file_path:
+    
+    if file_path == "C:/Users/Hp/Projects/ICEPOS/media/images/default_profile.png":
+        pass
+    elif file_path:
         rectangular_image = Image.open(file_path)
         resized_image = rectangular_image.resize((120, 120), Image.LANCZOS)
 
@@ -546,14 +547,16 @@ def submit():
 
                 # Define the data payload for the Pusher notification
                 pusher_data = {
-                    "interests": ["hello"],
-                    "web": {
-                        "notification": {
-                            "title": "New Shipment Booked",
-                            "body": "Hello, A new Shipment has been booked."
-                        }
-                    }
-                }
+                                "interests": ["hello"],
+                                "web": {
+                                    "notification": {
+                                        "title": "New Shipment Booked",
+                                        "body": "Hello, A new Shipment has been booked.",
+                                        "deep_link": "https://ice-auth.ryanbaig.repl.co/notifications"
+                                    }
+                                }
+                            }
+
 
                 # Send the POST request with JSON data for Pusher notification
                 pusher_response = requests.post(pusher_url, headers=pusher_headers, json=pusher_data)
@@ -578,9 +581,12 @@ def submit():
                 # Check the response for the second request
                 if info_response.status_code == 200:
                     print("Notification data sent successfully.")
+                    messagebox.showinfo("Notification Sent", "Notification with the data has been sent to those concerned.")
                 else:
                     print(f"Error sending notification data: {info_response.status_code} - {info_response.text}")
 
+            
+            messagebox.showinfo("Data Submission", "Data Submitted Successfully!")
             data = {
                 'ship_name': ship_name,
                 'ship_address': ship_address,
@@ -598,7 +604,6 @@ def submit():
                 'rec_contact': rec_contact
             }
             send_notification_and_data(info=data)
-            messagebox.showinfo("Data Submission", "Data Submitted Successfully!", icon="info")
     except Exception as e:
         print("Error in submit function:", str(e))
         pass
@@ -682,7 +687,7 @@ def create_formatted_image(ship_name, ship_address, ship_desc, ship_dest, ship_s
     background_img.save(f"{current_date}.png")
 
     # Show a message box indicating the image creation
-    messagebox.showinfo("Image Created", "Formatted image created successfully.", icon="info")
+    messagebox.showinfo("Image Created", "Formatted image created successfully.")
 
 
 # Print function
@@ -699,7 +704,7 @@ def print_image(image_path):
     try:
         os.startfile(os.path.abspath(image_path), "print")
 
-        messagebox.showinfo("Printing", "Formatted image sent to printer.", icon="info")
+        messagebox.showinfo("Printing", "Formatted image sent to printer.")
     except Exception as e:
         messagebox.showerror("Printing Error", str(e))
 
@@ -796,13 +801,13 @@ screen_info = screeninfo.get_monitors()[0]
 # Retrieve the monitor width and height
 width = screen_info.width
 height = screen_info.height
-icon = os.path.abspath("media/images/icon.ico")
+
 
 # Create the Tkinter window and set size and icon
 window = ttk.Window()
 window.title("ICE AIRWAY BILL")
 window.geometry(f"{width}x{height}")
-window.iconbitmap(icon)
+window.iconbitmap(os.path.abspath("media/images/icon.ico"))
 
 # Add the TTKBootstrap Theme
 style = Style("litera")
@@ -999,10 +1004,10 @@ def track_package():
     """
     # Retrieve the tracking number from tracking_entry.get()
     tracking_number = tracking_entry.get()
-    url = "https://aftership.com/track/"
+    url = "https://aftership.com/track/"+tracking_number
 
     import webbrowser
-    webbrowser.open(url+tracking_number)
+    webbrowser.open(url)
 
 
 # Function to initiate tracking in a separate thread
@@ -1050,7 +1055,7 @@ answers_text.configure(state="disabled")  # Set the state to "disabled"
 selected_answer = StringVar()
 
 # Create a Combobox for the dropdown
-answer_dropdown = ttk.Combobox(answers_tab, style="Custom.TCombobox", textvariable=selected_answer, width=30,
+answer_dropdown = ttk.Combobox(answers_tab, style="Custom.TCombobox", textvariable=selected_answer, width=50,
                                state="readonly")
 answer_dropdown.pack()
 

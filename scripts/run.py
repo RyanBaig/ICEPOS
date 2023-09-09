@@ -35,8 +35,8 @@ if missing_packages:
     print("Missing packages:")
     for package in missing_packages:
         print(package)
-    requirements_file = abspath("other\\requirements.txt")
-    os.system("pip install -r " + requirements_file)
+    os.system("venv\\Scripts\\activate")
+    os.system("pip install -r requirements.txt")
     os.system("python scripts\\icepos.py")
 else:
     print("All required packages are installed.")
