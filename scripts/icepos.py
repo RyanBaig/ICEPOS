@@ -102,22 +102,15 @@ def git_clone_with_progress(repo_url, destination_path):
 
 def check_update():
     """
-    Function to check for updates and execute the update process if necessary.
+    Check for updates in the background.
 
-    This function checks for updates by making a GET request to the specified URL.
-    If an update is available, it prompts the user with a message box asking if they
-    want to update. If the user chooses to update, it executes the update process
-    by performing the following steps:
-
-    1. Sleep for 1 second.
-    2. Close the connection.
-    3. Get the current directory of the script.
-    4. Move to a different directory to avoid being inside the target directory.
-    5. Remove the target directory if it exists.
-    6. Clone the repository from the specified URL to the specified target directory.
-    7. Show an info message box indicating that the update has been completed.
-
-    The update process is executed in a separate thread to avoid blocking the main thread.
+    This function sends a GET request to the specified URL to check for updates.
+    If the response status code is 200, it extracts the version number from the JSON
+    response and compares it with the current version. If they are not the same, it
+    prompts the user with a messagebox asking if they want to update. If the user
+    confirms, it destroys the current window and calls the `execute_check_update`
+    function with the new version. If the version numbers are the same, it displays
+    a messagebox informing the user that the application is up to date.
 
     Parameters:
     None
@@ -125,6 +118,7 @@ def check_update():
     Returns:
     None
     """
+    
     def execute_check_update(VERSION):
         """
         Executes a check and update process for the specified version.
