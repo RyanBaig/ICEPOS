@@ -1,4 +1,12 @@
-# [![Release](https://badgers.space/github/release/RyanGamingYT/ICEPOS)](https://github.com/RyanGamingYT/Notepad/releases/tag/v1.2) ![Checks](https://badgers.space//github/checks/RyanGamingYT/ICEPOS) [![License](https://badgers.space//github/license/RyanGamingYT/ICEPOS)](LICENSE.txt) ![Issues](https://badgers.space//github/open-issues/RyanGamingYT/ICEPOS) ![Maintainability](https://badgen.net/codeclimate/maintainability/RyanGamingYT/ICEPOS) ![Languages](https://img.shields.io/github/languages/top/RyanGamingYT/ICEPOS) ![Coverage](https://img.shields.io/codeclimate/coverage/RyanGamingYT/ICEPOS?style=flat&logo=codeclimate)
+#
+
+[![Release](https://badgers.space/github/release/RyanGamingYT/ICEPOS)](https://github.com/RyanGamingYT/Notepad/releases/tag/v1.2)
+![Checks](https://badgers.space//github/checks/RyanGamingYT/ICEPOS)
+[![License](https://badgers.space//github/license/RyanGamingYT/ICEPOS)](LICENSE.txt)
+![Issues](https://badgers.space//github/open-issues/RyanGamingYT/ICEPOS)
+![Languages](https://img.shields.io/github/languages/top/RyanGamingYT/ICEPOS)
+
+#
 
 # ICE POS
 
