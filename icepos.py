@@ -13,11 +13,11 @@ import shutil
 import stat
 from ttkbootstrap.widgets import DateEntry
 import threading
-from py_functions import close_connection, create_db, db_to_dict, delete_db, display_consign_key, generate_consign_key
+from py_functions import close_connection, create_db, db_to_dict, delete_db, display_consign_key, generate_consign_key, create_db_
 import customtkinter as ctk
 from custom_widgets import CustomMessagebox
 
-
+create_db_()
 # Functions:
 def on_rm_error(path):
 
@@ -234,7 +234,7 @@ def reset():
         create_db()
         window.destroy()
 
-create_db()
+
 def toggle_fullscreen():
     """
     Toggle the fullscreen mode of the window.
@@ -873,8 +873,9 @@ menu_icon = ctk.CTkImage(Image.open("menu.png"))
 hamburger = ctk.CTkButton(submission_canvas, image=menu_icon, command=toggle_menu, text="", height=32, width=32)
 hamburger.place(anchor=tk.NW, )  # Position the hamburger button in the top-left corner
 
+# Label for personal info
 personal_info_label = ctk.CTkLabel(sidebar, text="Personal Information", font=("Arial", 15))
-personal_info_label.pack(pady=5)
+personal_info_label.pack(pady=2)
 
 # Load the saved image path
 saved_image_path = None

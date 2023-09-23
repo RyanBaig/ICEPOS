@@ -65,6 +65,66 @@ def create_db():
 
         print("SQLite Database and Table Created Successfully.")
 
+def create_db_():
+            """
+        Creates a SQLite database and table.
+        a new SQLite database is created and a connection is established. 
+        Otherwise, the function will not create a new database and will proceed with the existing one.
+
+        The function then creates a cursor object from the connection, which will be used to execute SQL commands. 
+
+        Next, the function defines an SQL command to create a table named "answers" with several columns, 
+        including shipper_name, shipper_address, shipper_contact, shipment_description, shipment_destination, 
+        shipment_service, receiver_name, receiver_address, rec_contact, receiver_zipcode, weight, charges, 
+        no_of_pieces, date, and consign_identifier. The table will be created only if it does not already exist.
+
+        The function executes the create table command using the cursor.
+
+        Finally, the changes made to the database are committed, the connection is closed, and a success message is printed.
+
+        Parameters:
+        None
+
+        Returns:
+        None
+        """
+            if not os.path.exists("ice-answers.db"):
+                # Create a connection to the SQLite database or create a new one if it doesn't exist
+                global conn
+                conn = sqlite3.connect("ice-answers.db")
+                # Create a cursor object from the connection to execute SQL commands
+                global cursor
+                cursor = conn.cursor()
+
+                # Define the SQL command to create the table with the specified columns
+                create_table_query = """
+                    CREATE TABLE IF NOT EXISTS answers (
+                    shipper_name TEXT,
+                    shipper_address TEXT,
+                    shipper_contact INTEGER,
+                    shipment_description TEXT,
+                    shipment_destination TEXT,
+                    shipment_service TEXT,
+                    receiver_name TEXT,
+                    receiver_address TEXT,
+                    rec_contact INTEGER,
+                    receiver_zipcode INTEGER,
+                    weight TEXT,
+                    charges TEXT,
+                    no_of_pieces INTEGER,
+                    date DATE,
+                    consign_identifier TEXT PRIMARY KEY
+                );
+                    """
+
+                # Execute the create table command
+                cursor.execute(create_table_query)
+
+                # Commit the changes and close the connection
+                conn.commit()
+                conn.close()
+
+                print("SQLite Database and Table Created Successfully.")
 
 def db_to_dict():
         """
