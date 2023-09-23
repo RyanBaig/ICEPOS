@@ -2,7 +2,37 @@ import os
 import sqlite3
 from custom_widgets import CustomMessagebox
 import pickle
+import requests
+import zipfile
 
+def update_icepos():
+    # Replace with the GitHub file URL you want to download
+    github_file_url = "https://github.com/RyanBaig/ICEPOS/raw/master/ICEPOS.zip"
+
+    # Define the download directory
+    download_dir = os.path.join(os.path.expanduser("~"), "Downloads")  # This is the user's home directory
+    download_path = os.path.join(download_dir, "downloaded.zip")
+
+    # Send a GET request to the GitHub URL
+    response = requests.get(github_file_url)
+
+    # Check if the request was successful
+    if response.status_code == 200:
+        # Save the response content to a file
+        with open(download_path, "wb") as file:
+            file.write(response.content)
+        print("File downloaded successfully.")
+
+        # Unzip the downloaded file
+        with zipfile.ZipFile(download_path, "r") as zip_ref:
+            zip_ref.extractall(download_dir)
+        print("File unzipped successfully.")
+
+        # Clean up the downloaded zip file
+        os.remove(download_path)
+        print("Downloaded zip file removed.")
+    else:
+        print("Failed to download the file. Status code:", response.status_code)
 
 def create_db():
         """
@@ -88,16 +118,15 @@ def create_db_():
         Returns:
         None
         """
-            if not os.path.exists("ice-answers.db"):
-                # Create a connection to the SQLite database or create a new one if it doesn't exist
-                global conn
-                conn = sqlite3.connect("ice-answers.db")
-                # Create a cursor object from the connection to execute SQL commands
-                global cursor
-                cursor = conn.cursor()
+            # Create a connection to the SQLite database or create a new one if it doesn't exist
+            global conn
+            conn = sqlite3.connect("ice-answers.db")
+            # Create a cursor object from the connection to execute SQL commands
+            global cursor
+            cursor = conn.cursor()
 
-                # Define the SQL command to create the table with the specified columns
-                create_table_query = """
+            # Define the SQL command to create the table with the specified columns
+            create_table_query = """
                     CREATE TABLE IF NOT EXISTS answers (
                     shipper_name TEXT,
                     shipper_address TEXT,
@@ -117,14 +146,14 @@ def create_db_():
                 );
                     """
 
-                # Execute the create table command
-                cursor.execute(create_table_query)
+            # Execute the create table command
+            cursor.execute(create_table_query)
 
-                # Commit the changes and close the connection
-                conn.commit()
-                conn.close()
+            # Commit the changes and close the connection
+            conn.commit()
+            conn.close()
 
-                print("SQLite Database and Table Created Successfully.")
+            print("SQLite Database and Table Created Successfully.")
 
 def db_to_dict():
         """

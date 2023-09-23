@@ -13,94 +13,38 @@ import shutil
 import stat
 from ttkbootstrap.widgets import DateEntry
 import threading
-from py_functions import close_connection, create_db, db_to_dict, delete_db, display_consign_key, generate_consign_key, create_db_
+from py_functions import close_connection, create_db, db_to_dict, delete_db, display_consign_key, generate_consign_key, create_db_, update_icepos
 import customtkinter as ctk
 from custom_widgets import CustomMessagebox
 
-create_db_()
+
 # Functions:
-def on_rm_error(path):
-
-    """
-    A function that is called when an error occurs while removing a file or directory.
-
-    Parameters:
-        func (callable): The function that raised the exception.
-        path (str): The path of the file or directory that caused the error.
-        exc_info (tuple): Information about the exception that was raised.
-
-    Returns:
-        None
-    """
-
-    # Change permissions to allow write and then unlink
-    os.chmod(path, stat.S_IWRITE)
-    os.unlink(path)
-
-def git_clone_with_progress(repo_url, destination_path):
-    """
-    Clones a Git repository from the specified URL to the given destination path.
-
-    Parameters:
-        repo_url (str): The URL of the Git repository to clone.
-        destination_path (str): The path where the repository will be cloned.
-
-    Returns:
-        None
-    """
-    # Create a Tkinter window for the message box
-    root = ctk.CTk()
-    root.withdraw()  # Hide the main window
-
-    try:
-        if os.path.exists(destination_path):
-            for i in os.listdir(destination_path):
-                if i.endswith('.git'):
-                    tmp = os.path.join(destination_path, i)
-                    # Unhide the .git folder before unlinking it
-                    subprocess.call(['attrib', '-H', tmp])
-                    shutil.rmtree(tmp, onerror=on_rm_error)
-                    print(".git folder removed successfully.")
-    except Exception as e:
-        print("Error handling existing folder:", str(e))
-
-    try:
-        # Delete the entire directory (ICEPOS) if it exists
-        if os.path.exists(destination_path):
-            shutil.rmtree(destination_path, onerror=on_rm_error)
-            print("Directory removed successfully:", destination_path)
-    except Exception as e:
-        print("Error deleting directory:", str(e))
-
-    # Open a subprocess and capture its output
-    time.sleep(5)
-    process = subprocess.Popen(
-        f"git clone {repo_url} {destination_path}",
-        shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True
-    )
-
-    # Update the message box with cloning progress
-    progress_message = ""
-    while True:
-        line = process.stdout.readline()
-        if not line:
-            break
-        progress_message += line
-        CustomMessagebox.showinfo("Cloning Progress", progress_message)
-
-    # Close the subprocess
-    process.communicate()
-
-    # Show a final message box with the completion status
-    if process.returncode == 0:
-        CustomMessagebox.showinfo("Cloning Completed", "Repository cloned successfully!")
-    else:
-        CustomMessagebox.showinfo("Cloning Failed", "Repository cloning failed.")
 
 def check_update():
+    time.sleep(1)
+    close_connection()
+
+    # Get the current directory of the script
+    script_directory = os.path.dirname("C:\\Users\\Hp\\Downloads\\icepos")
+
+    # Move to a different directory to avoid being inside the target directory
+    os.chdir(script_directory)
+
+    # Remove the target directory
+    target_directory = "./icepos"
+    if os.path.exists(target_directory):
+        try:
+            shutil.rmtree(target_directory)
+        except Exception as e:
+            print("Error while removing directory:", str(e))
+            pass
+
+    # Clone the repository
+    update_icepos()
+
+    CustomMessagebox.showinfo("ICEPOS Update", "ICEPOS has been updated.")
+
+def check_update_background():
     """
     Check for updates in the background.
 
@@ -118,71 +62,20 @@ def check_update():
     Returns:
     None
     """
-    
-    def execute_check_update(VERSION):
-        """
-        Executes a check and update process for the specified version.
-        
-        Args:
-            VERSION (str): The version to check and update.
-        
-        Returns:
-            None
-        """
-        time.sleep(1)
-        close_connection()
+    CURRENT_VERSION = "v1.4"
+    URL = "https://ice-auth.ryanbaig.repl.co/api/check_update"
+    r = requests.get(URL)
+    if r.status_code == 200:
+        VERSION = r.json()["version"]
+        if CURRENT_VERSION <= VERSION:
+            result = CustomMessagebox.askyesno("Update Needed", "An Update has been found, do you want to update ICEPOS right now?")
+            if result == "Yes":
+                window.destroy()
+                check_update()
+        else:
+            CustomMessagebox.showinfo("Update Information", "ICEPOS is up to date.")
 
-        # Get the current directory of the script
-        script_directory = os.path.dirname(os.path.abspath(__file__))
-
-        # Move to a different directory to avoid being inside the target directory
-        os.chdir(script_directory)
-
-        # Remove the target directory
-        target_directory = "./icepos"
-        if os.path.exists(target_directory):
-            try:
-                os.removedirs(target_directory)
-            except Exception as e:
-                print("Error while removing directory:", str(e))
-                pass
-
-        # Clone the repository
-        git_clone_with_progress("https://github.com/RyanGamingYT/ICEPOS", "C:\\Users\\Hp\\Downloads\\ICEPOS")
-
-        CustomMessagebox.showinfo("ICEPOS Update", "ICEPOS has been updated to version " + VERSION)
-
-    def check_update_background():
-        """
-        Check for updates in the background.
-
-        This function sends a GET request to the specified URL to check for updates.
-        If the response status code is 200, it extracts the version number from the JSON
-        response and compares it with the current version. If they are not the same, it
-        prompts the user with a ctkmessagebox asking if they want to update. If the user
-        confirms, it destroys the current window and calls the `execute_check_update`
-        function with the new version. If the version numbers are the same, it displays
-        a ctkmessagebox informing the user that the application is up to date.
-
-        Parameters:
-        None
-
-        Returns:
-        None
-        """
-        CURRENT_VERSION = "v1.4"
-        URL = "https://ice-auth.ryanbaig.repl.co/api/check_update"
-        r = requests.get(URL)
-        if r.status_code == 200:
-            VERSION = r.json()["version"]
-            if CURRENT_VERSION != VERSION:
-                result = CustomMessagebox.askyesno("Update Needed", "An Update has been found, do you want to update ICEPOS right now?")
-                if result:
-                    window.destroy()
-                    execute_check_update(VERSION)
-            else:
-                CustomMessagebox.showinfo("Update Information", "ICEPOS is up to date.")
-
+def start_update_check():
     # Run the update check in a separate thread
     update_thread = threading.Thread(target=check_update_background)
     update_thread.start()
@@ -202,9 +95,6 @@ def exit_win():
   dialog = CustomMessagebox.askyesno("Confirmation", "Do you want to proceed?")
   if dialog == "Yes":
     window.destroy()
-
-
-
 
 
 def reset():
@@ -585,29 +475,10 @@ def submit():
 
 
 
-            def send_notification_and_data_in_thread(payload, completion_event):
-                """
-                Sends a push notification and data using the Pusher API in a separate thread.
-
-                Args:
-                    payload (dict): The data payload for the Pusher notification.
-                    completion_event (threading.Event): An event that will be set when the function has finished.
-
-                Returns:
-                    None
-
-                Raises:
-                    None
-                """
-                # Set the event to indicate completion
-                completion_event.set()
-
-                send_notification_and_data(payload)
-                completion_event.set()
 
 
             CustomMessagebox.showinfo("Data Submission", "Data Submitted Successfully!")
-            data = {
+            data_payload = {
                 'ship_name': ship_name,
                 'ship_address': ship_address,
                 'ship_desc': ship_desc,
@@ -623,9 +494,8 @@ def submit():
                 'ship_contact': ship_contact,
                 'rec_contact': rec_contact
             }
-            event = threading.Event()
-            send_notification_and_data_in_thread(payload=data, completion_event=event)
-            event.wait()
+            thread = threading.Thread(target=send_notification_and_data(info=data_payload))
+            thread.start()
     except Exception as e:
         print("Error in submit function:", str(e))
         pass
@@ -1064,7 +934,7 @@ last_c_key_button = ctk.CTkButton(sidebar, text="Show Last Used Consign Key", co
 last_c_key_button.pack(side="top", padx=5, pady=5, fill="x")
 
 # Create a button to check for updates
-check_updates_button = ctk.CTkButton(sidebar, text="Check For Updates", command=check_update)
+check_updates_button = ctk.CTkButton(sidebar, text="Check For Updates", command=start_update_check)
 # last_c_key_button.grid(row=0, column=0, padx=5, pady=5, sticky="w")
 check_updates_button.pack(side="top", padx=5, pady=5, fill="x")
 
@@ -1119,9 +989,11 @@ def update_dropdown_with_data():
     answer_dropdown.configure(values = list(ans.keys()))
     answer_dropdown.rows = ans
 
-
-# Populate the Combobox with the shipper names from the database
-cursor.execute('SELECT shipper_name, receiver_name FROM answers')
+try:
+    # Populate the Combobox with the shipper names from the database
+    cursor.execute('SELECT shipper_name, receiver_name FROM answers')
+except sqlite3.OperationalError as e:
+    create_db_()
 shipper_receiver_names = cursor.fetchall()
 answer_dropdown.configure(values = [f"{shipper} - {receiver}" for shipper, receiver in shipper_receiver_names])
 

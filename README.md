@@ -21,6 +21,7 @@ interface for data submission, retrieval, and printing, along with a custom iden
 ## Installation Instructions
 
 ### For Non-Production Use:
+
 - Clone this repo using the following:
 
 ```bash
@@ -38,6 +39,7 @@ cd ICEPOS
 - If you want to use it frequently then create a shortcut ([ICEPOS.ink](ICE%20POS.lnk)) for the `run.bat` file.
 
 ### For Production Use:
+
 - Download the ZIP file of the software ([ICEPOS.zip](ICEPOS.zip))
 - Extract the files.
 - Find the EXE file (icepos.exe)
