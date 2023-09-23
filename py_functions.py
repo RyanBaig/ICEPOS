@@ -1,6 +1,6 @@
 import os
 import sqlite3
-from tkinter import messagebox
+from custom_widgets import CustomMessagebox
 import pickle
 
 
@@ -206,7 +206,7 @@ def display_consign_key():
     latest_key = load_last_consign_key()
     if latest_key == 0:
         latest_key = "0000"
-    messagebox.showinfo("Last Used Consign Key", f"The latest used consign key is ICE-SHIP-{latest_key}.")
+    CustomMessagebox.showinfo("Last Used Consign Key", f"The latest used consign key is ICE-SHIP-{latest_key}.")
 
 
 def close_connection():

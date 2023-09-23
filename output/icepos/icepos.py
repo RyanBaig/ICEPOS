@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox, StringVar, filedialog, simpledialog
+from tkinter import filedialog
 import sqlite3
 from PIL import Image, ImageDraw, ImageFont, ImageTk
 import screeninfo
@@ -11,12 +11,12 @@ import requests
 import subprocess
 import shutil
 import stat
-import ttkbootstrap as ttk
-from ttkbootstrap import Style
 from ttkbootstrap.widgets import DateEntry
 import threading
 from py_functions import close_connection, create_db, db_to_dict, delete_db, display_consign_key, generate_consign_key
-
+import customtkinter as ctk
+from custom_widgets import CustomMessagebox
+from CTkMessagebox import CTkMessagebox
 
 # Functions:
 def on_rm_error(path):
@@ -89,16 +89,16 @@ def git_clone_with_progress(repo_url, destination_path):
         if not line:
             break
         progress_message += line
-        messagebox.showinfo("Cloning Progress", progress_message)
+        CustomMessagebox.showinfo("Cloning Progress", progress_message)
 
     # Close the subprocess
     process.communicate()
 
     # Show a final message box with the completion status
     if process.returncode == 0:
-        messagebox.showinfo("Cloning Completed", "Repository cloned successfully!")
+        CustomMessagebox.showinfo("Cloning Completed", "Repository cloned successfully!")
     else:
-        messagebox.showinfo("Cloning Failed", "Repository cloning failed.")
+        CustomMessagebox.showinfo("Cloning Failed", "Repository cloning failed.")
 
 def check_update():
     """
@@ -107,10 +107,10 @@ def check_update():
     This function sends a GET request to the specified URL to check for updates.
     If the response status code is 200, it extracts the version number from the JSON
     response and compares it with the current version. If they are not the same, it
-    prompts the user with a messagebox asking if they want to update. If the user
+    prompts the user with a ctkmessagebox asking if they want to update. If the user
     confirms, it destroys the current window and calls the `execute_check_update`
     function with the new version. If the version numbers are the same, it displays
-    a messagebox informing the user that the application is up to date.
+    a ctkmessagebox informing the user that the application is up to date.
 
     Parameters:
     None
@@ -150,7 +150,7 @@ def check_update():
         # Clone the repository
         git_clone_with_progress("https://github.com/RyanGamingYT/ICEPOS", "C:\\Users\\Hp\\Downloads\\ICEPOS")
 
-        messagebox.showinfo("ICEPOS Update", "ICEPOS has been updated to version " + VERSION)
+        CustomMessagebox.showinfo("ICEPOS Update", "ICEPOS has been updated to version " + VERSION)
 
     def check_update_background():
         """
@@ -159,10 +159,10 @@ def check_update():
         This function sends a GET request to the specified URL to check for updates.
         If the response status code is 200, it extracts the version number from the JSON
         response and compares it with the current version. If they are not the same, it
-        prompts the user with a messagebox asking if they want to update. If the user
+        prompts the user with a ctkmessagebox asking if they want to update. If the user
         confirms, it destroys the current window and calls the `execute_check_update`
         function with the new version. If the version numbers are the same, it displays
-        a messagebox informing the user that the application is up to date.
+        a ctkmessagebox informing the user that the application is up to date.
 
         Parameters:
         None
@@ -170,38 +170,41 @@ def check_update():
         Returns:
         None
         """
-        CURRENT_VERSION = "v1.3"
+        CURRENT_VERSION = "v1.4"
         URL = "https://ice-auth.ryanbaig.repl.co/api/check_update"
         r = requests.get(URL)
         if r.status_code == 200:
             VERSION = r.json()["version"]
             if CURRENT_VERSION != VERSION:
-                result = messagebox.askyesno("Update Needed", "An Update has been found, do you want to update ICEPOS right now?")
+                result = CustomMessagebox.askyesno("Update Needed", "An Update has been found, do you want to update ICEPOS right now?")
                 if result:
                     window.destroy()
                     execute_check_update(VERSION)
             else:
-                messagebox.showinfo("Update Information", "ICEPOS is up to date.")
+                CustomMessagebox.showinfo("Update Information", "ICEPOS is up to date.")
 
     # Run the update check in a separate thread
     update_thread = threading.Thread(target=check_update_background)
     update_thread.start()
 
 
+
 def exit_win():
-    """
-    Asks the user for confirmation and closes the connection and destroys the window if the user agrees.
+  """
+  Asks the user for confirmation and closes the connection and destroys the window if the user agrees.
 
-    Parameters:
+  Parameters:
     None
 
-    Returns:
+  Returns:
     None
-    """
-    result = messagebox.askyesno("Confirmation", "Do you want to proceed?")
-    if result:
-        close_connection()
-        window.destroy()
+  """
+  dialog = CustomMessagebox.askyesno("Confirmation", "Do you want to proceed?")
+  if dialog == "Yes":
+    window.destroy()
+
+
+
 
 
 def reset():
@@ -216,7 +219,7 @@ def reset():
     """
     global conn
     conn = sqlite3.connect("ice-answers.db")
-    result = messagebox.askyesno("Confirmation", "Do you want to proceed?")
+    result = CustomMessagebox.askyesno("Confirmation", "Do you want to proceed?")
     if result:
         try:
             conn.close()
@@ -261,11 +264,12 @@ def get_username():
     Returns:
         None
     """
-    name = simpledialog.askstring("Username", "Please enter your username")
+    dialog = ctk.CTkInputDialog(text="Type Your New Username", title="New Username")
+    name = dialog.get_input()
     if name:
         with open(file="username.txt", mode="w") as file:
             file.write(name)
-        name_button.configure(text=name)
+        name_button.configure(text=str(name))
 
 
 def change_profile_pic():
@@ -295,12 +299,12 @@ def change_profile_pic():
 
         circular_image_tk = ImageTk.PhotoImage(circular_image)
 
-        profile_b.config(image=circular_image_tk)
-        profile_b.image = circular_image_tk
-
         # Save the selected image path to a file
         with open(file="selected_image_path.txt", mode="w") as file:
             file.write(file_path)
+        
+        profile_b.image = circular_image_tk
+        profile_b.config(image=circular_image_tk)
 
 
 def toggle_menu():
@@ -491,7 +495,7 @@ def submit():
 
         # Check if any field is empty
         if any(value == '' for value in [ship_name, ship_address, ship_desc, ship_dest, ship_serv, rec_name, rec_address, rec_zipcode, ship_weight, ship_charges, no_of_pieces, date, ship_contact, rec_contact]):
-            messagebox.showerror("Error", "All fields are required!")
+            CustomMessagebox.showerror("Error", "All fields are required!")
         else:
             # Insert the data into the database
             cursor.execute(f"""
@@ -575,12 +579,12 @@ def submit():
                 # Check the response for the second request
                 if info_response.status_code == 200:
                     print("Notification data sent successfully.")
-                    messagebox.showinfo("Notification Sent", "Notification with the data has been sent to those concerned.")
+                    CustomMessagebox.showinfo("Notification Sent", "Notification with the data has been sent to those concerned.")
                 else:
                     print(f"Error sending notification data: {info_response.status_code} - {info_response.text}")
 
             
-            messagebox.showinfo("Data Submission", "Data Submitted Successfully!")
+            CustomMessagebox.showinfo("Data Submission", "Data Submitted Successfully!")
             data = {
                 'ship_name': ship_name,
                 'ship_address': ship_address,
@@ -681,7 +685,7 @@ def create_formatted_image(ship_name, ship_address, ship_desc, ship_dest, ship_s
     background_img.save(f"{current_date}.png")
 
     # Show a message box indicating the image creation
-    messagebox.showinfo("Image Created", "Formatted image created successfully.")
+    CustomMessagebox.showinfo("Image Created", "Formatted image created successfully.")
 
 
 # Print function
@@ -698,9 +702,9 @@ def print_image(image_path):
     try:
         os.startfile(image_path, "print")
 
-        messagebox.showinfo("Printing", "Formatted image sent to printer.")
+        CustomMessagebox.showinfo("Printing", "Formatted image sent to printer.")
     except Exception as e:
-        messagebox.showerror("Printing Error", str(e))
+        CustomMessagebox.showerror("Printing Error", str(e))
 
 def generate_airway_bill_with_terms_and_conditions():
     """
@@ -773,7 +777,7 @@ def print_formatted_image():
             entry_ship_contact, entry_rec_contact]
     values = [entry.get() for entry in entries] + [entry_date.entry.get()]
     if any(value == '' for value in values):
-        messagebox.showerror("Error", "All fields are required!")
+        CustomMessagebox.showerror("Error", "All fields are required!")
     else:
         create_formatted_image(ship_name, ship_address, ship_desc, ship_dest, ship_serv, rec_name, rec_address,
                                rec_zipcode, ship_weight, ship_charges, no_of_pieces, date, ship_contact, rec_contact,
@@ -786,7 +790,7 @@ def print_formatted_image():
             print_image(f'{current_date}.png')
             os.remove(f"{current_date}.png")
         except Exception as e:
-            messagebox.showerror("Printing Error", str(e))
+            CustomMessagebox.showerror("Printing Error", str(e))
 
 
 # Get the primary monitor information
@@ -796,28 +800,29 @@ screen_info = screeninfo.get_monitors()[0]
 width = screen_info.width
 height = screen_info.height
 
+# Add the Theme Settings
+ctk.set_appearance_mode("Light")  # Modes: "System" (standard), "Dark", "Light"
+ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
 # Create the Tkinter window and set size and icon
-window = ttk.Window()
+window = ctk.CTk()
 window.title("ICE AIRWAY BILL")
 window.geometry(f"{width}x{height}")
 window.iconbitmap("icon.ico")
 
-# Add the TTKBootstrap Theme
-style = Style("litera")
 
 # Create a Tab Control
-tab_control = ttk.Notebook(window)
+tab_control = ctk.CTkTabview(window)
 
 # Create the Submission tab
-submission_tab = ttk.Frame(tab_control)
-tab_control.add(submission_tab, text='Submission')
+
+tab_control.add('Submission')
 
 # Add the Tab Control to the window
 tab_control.pack(expand=1, fill="both")
 
 # Create a Canvas widget for the Submission tab
-submission_canvas = tk.Canvas(submission_tab, width=1350, height=700)
+submission_canvas = ctk.CTkCanvas(tab_control.tab("Submission"), width=1350, height=700)
 submission_canvas.pack()
 
 # Load the background image for the Submission tab
@@ -837,12 +842,13 @@ except tk.TclError as e:
 sidebar = tk.Frame(window, bg="lightgray", width=200)
 sidebar.place(x=-300, y=0, relheight=1, anchor=tk.NW)
 
-# Create the hamburger button using the PNG icon
-menu_icon = tk.PhotoImage(file="menu.png")
-hamburger = ttk.Button(submission_canvas, image=menu_icon, command=toggle_menu, style="Light.TButton")
-hamburger.place(x=10, y=10, anchor=tk.NW)  # Position the hamburger button in the top-left corner
 
-personal_info_label = ttk.Label(sidebar, text="Personal Information", font=("Arial", 15))
+# Create the hamburger button using the PNG icon
+menu_icon = ctk.CTkImage(Image.open("menu.png"))
+hamburger = ctk.CTkButton(submission_canvas, image=menu_icon, command=toggle_menu, text="", height=32, width=32)
+hamburger.place(anchor=tk.NW, )  # Position the hamburger button in the top-left corner
+
+personal_info_label = ctk.CTkLabel(sidebar, text="Personal Information", font=("Arial", 15))
 personal_info_label.pack(pady=5)
 
 # Load the saved image path
@@ -868,71 +874,72 @@ if saved_image_path:
 else:
     circular_image = Image.open("default_profile.png")
 
-circular_image_tk = ImageTk.PhotoImage(circular_image)
+circular_image_tk = ctk.CTkImage(circular_image, size=(120,120))
 
-# Create the profile button using the loaded/saved image
-profile_b = ttk.Button(sidebar, image=circular_image_tk, command=change_profile_pic, style="Light.TButton")
-profile_b.image = circular_image_tk  # Store the reference to avoid image garbage collection
-profile_b.pack(pady=5)
+
+# Create the profile button
+profile_b = ctk.CTkButton(sidebar, image=circular_image_tk, command=change_profile_pic, text="", height=120, width=120)
+profile_b.image = circular_image_tk
+profile_b.place()
 
 # Shipper name (1)
-entry_ship_name = ttk.Entry(submission_tab, width=55, font=("Arial", 14), style="TEntry")
+entry_ship_name = ctk.CTkEntry(tab_control.tab("Submission"), width=550, font=("Arial", 14))
 entry_ship_name.place(x=45, y=210)
 
 # Shipper Address (2)
-entry_ship_address = tk.StringVar()
-entry_ship_address_entry = ttk.Entry(submission_tab, width=55, font=("Arial", 14), style="TEntry",
+entry_ship_address = ctk.StringVar()
+entry_ship_address_entry = ctk.CTkEntry(tab_control.tab("Submission"), width=550, font=("Arial", 14),
                                      textvariable=entry_ship_address)
 entry_ship_address_entry.place(x=45, y=305)
 
 # Shipment Description (3)
-entry_ship_desc = ttk.Entry(submission_tab, width=55, font=("Arial", 14), style="TEntry")
+entry_ship_desc = ctk.CTkEntry(tab_control.tab("Submission"), width=550, font=("Arial", 14))
 entry_ship_desc.place(x=45, y=395)
 
 # Shipment Contact # (4)
-entry_ship_contact = ttk.Entry(submission_tab, width=24, font=("Arial", 14), style="TEntry")
+entry_ship_contact = ctk.CTkEntry(tab_control.tab("Submission"), width=240, font=("Arial", 14))
 entry_ship_contact.place(x=45, y=490)
 
 # Shipment Date (5)
-entry_date = DateEntry(submission_tab, bootstyle='primary', width=37)
+entry_date = DateEntry(tab_control.tab("Submission"), bootstyle='primary', width=37)
 entry_date.place(x=697, y=190)
 
 # Shipment Destination (6)
-entry_ship_dest = ttk.Entry(submission_tab, width=28, font=("Arial", 14), style="TEntry")
+entry_ship_dest = ctk.CTkEntry(tab_control.tab("Submission"), width=280, font=("Arial", 14))
 entry_ship_dest.place(x=700, y=270)
 
 # Shipment Service (7)
-entry_ship_serv = ttk.Entry(submission_tab, width=18, font=("Arial", 14), style="TEntry")
+entry_ship_serv = ctk.CTkEntry(tab_control.tab("Submission"), width=180, font=("Arial", 14))
 entry_ship_serv.place(x=1100, y=270)
 
 # Receiver Name (8)
-entry_rec_name = ttk.Entry(submission_tab, width=55, font=("Arial", 14), style="TEntry")
+entry_rec_name = ctk.CTkEntry(tab_control.tab("Submission"), width=550, font=("Arial", 14))
 entry_rec_name.place(x=700, y=375)
 
 # Receiver Address (9)
-entry_rec_address = tk.StringVar()
-entry_rec_address_entry = ttk.Entry(submission_tab, width=55, font=("Arial", 14), style="TEntry",
+entry_rec_address = ctk.StringVar()
+entry_rec_address_entry = ctk.CTkEntry(tab_control.tab("Submission"), width=550, font=("Arial", 14),
                                     textvariable=entry_rec_address)
 entry_rec_address_entry.place(x=700, y=470)
 
 # Receiver Zipcode (10)
-entry_rec_zipcode = ttk.Entry(submission_tab, width=20, font=("Arial", 14), style="TEntry")
+entry_rec_zipcode = ctk.CTkEntry(tab_control.tab("Submission"), width=200, font=("Arial", 14))
 entry_rec_zipcode.place(x=1052, y=580)
 
 # Shipment Weight (11)
-entry_ship_weight = ttk.Entry(submission_tab, width=14, font=("Arial", 14), style="TEntry")
+entry_ship_weight = ctk.CTkEntry(tab_control.tab("Submission"), width=140, font=("Arial", 14))
 entry_ship_weight.place(x=45, y=595)
 
 # Shipment Charges (12)
-entry_ship_charges = ttk.Entry(submission_tab, width=15, font=("Arial", 14), style="TEntry")
+entry_ship_charges = ctk.CTkEntry(tab_control.tab("Submission"), width=150, font=("Arial", 14))
 entry_ship_charges.place(x=470, y=595)
 
 # No. of Pieces (13)
-entry_no_of_pieces = ttk.Entry(submission_tab, width=13, font=("Arial", 14), style="TEntry")
+entry_no_of_pieces = ctk.CTkEntry(tab_control.tab("Submission"), width=130, font=("Arial", 14))
 entry_no_of_pieces.place(x=260, y=595)
 
 # Consignee Contact (14)
-entry_rec_contact = ttk.Entry(submission_tab, width=20, font=("Arial", 14), style="TEntry")
+entry_rec_contact = ctk.CTkEntry(tab_control.tab("Submission"), width=200, font=("Arial", 14))
 entry_rec_contact.place(x=725, y=577)
 
 # Create a connection to the SQLite database
@@ -945,12 +952,12 @@ fields = ["Shipper Name", "Shipper Address", "Shipment Description", "Shipment D
           "Receiver Name", "Receiver Address", "Receiver Zipcode", "Shipment Weight", "Shipment Charges"]
 
 # Create Submit Button
-submit_button = ttk.Button(submission_tab, text="Submit", style="TButton", width=10,
+submit_button = ctk.CTkButton(tab_control.tab("Submission"), text="Submit", width=10,
                            command=lambda: [submit(), refresh_dropdown_and_text()])
 submit_button.place(x=600, y=600)
 
 # Create Print Button
-print_button = ttk.Button(submission_tab, text="Print", width=10, style="TButton",
+print_button = ctk.CTkButton(tab_control.tab("Submission"), text="Print", width=10,
                           command=lambda: [print_formatted_image(), refresh_dropdown_and_text()])
 print_button.place(x=710, y=600)
 
@@ -958,16 +965,15 @@ print_button.place(x=710, y=600)
 window.protocol("WM_DELETE_WINDOW", close_connection)
 
 # Create an Answers tab
-answers_tab = ttk.Frame(tab_control)
-tab_control.add(answers_tab, text='Answers')
+tab_control.add('Answers')
 
 # Create a button to input name
-name_button = ttk.Button(sidebar, text="Your Username", command=get_username)
+name_button = ctk.CTkButton(sidebar, text="Your Username", command=get_username)
 name_button.pack(pady=5)
 
 # Label for settings
-settings_label = ttk.Label(sidebar, text="Settings", font=("Arial", 15))
-settings_label.pack(pady=5)
+settings_label = ctk.CTkLabel(sidebar, text="Settings", font=("Arial", 15))
+settings_label.pack(pady=2)
 
 saved_username = None
 try:
@@ -979,15 +985,15 @@ except FileNotFoundError:
 if saved_username:
     name_button.configure(text=saved_username)
 
-# Create a new tab in the existing ttk.Notebook widget for the "Tracking" tab
-tracking_tab = ttk.Frame(tab_control)
-tab_control.add(tracking_tab, text='Tracking')
+# Create a new tab in the existing ctk.Notebook widget for the "Tracking" tab
+
+tab_control.add('Tracking')
 
 # Design and add UI elements for tracking
-tracking_label = ttk.Label(tracking_tab, text="Enter Tracking Number:", font=("Arial", 15))
+tracking_label = ctk.CTkLabel(tab_control.tab("Tracking"), text="Enter Tracking Number:", font=("Arial", 15))
 tracking_label.pack(pady=10)
 
-tracking_entry = ttk.Entry(tracking_tab, width=30, font=("Arial", 14))
+tracking_entry = ctk.CTkEntry(tab_control.tab("Tracking"), width=300, font=("Arial", 14))
 tracking_entry.pack(pady=5)
 
 def track_package():
@@ -1018,39 +1024,38 @@ def track_package_thread():
     tracking_thread = threading.Thread(target=track_package)
     tracking_thread.start()
 
-tracking_button = ttk.Button(tracking_tab, text="Track", style="TButton", width=10, command=track_package_thread)
+tracking_button = ctk.CTkButton(tab_control.tab("Tracking"), text="Track", width=10, command=track_package_thread)
 tracking_button.pack(pady=5)
 
 # Create a button to toggle fullscreen
-fullscreen_button = ttk.Button(sidebar, text="Toggle Fullscreen", command=toggle_fullscreen)
+fullscreen_button = ctk.CTkButton(sidebar, text="Toggle Fullscreen", command=toggle_fullscreen)
 # fullscreen_button.grid(row=0, column=0, padx=5, pady=5, sticky="w")
 fullscreen_button.pack(side="top", padx=5, pady=5, fill="x")
 
 # Create a button to show last used consign key
-last_c_key_button = ttk.Button(sidebar, text="Show Last Used Consign Key", command=display_consign_key)
+last_c_key_button = ctk.CTkButton(sidebar, text="Show Last Used Consign Key", command=display_consign_key)
 # last_c_key_button.grid(row=0, column=0, padx=5, pady=5, sticky="w")
 last_c_key_button.pack(side="top", padx=5, pady=5, fill="x")
 
 # Create a button to check for updates
-check_updates_button = ttk.Button(sidebar, text="Check For Updates", command=check_update)
+check_updates_button = ctk.CTkButton(sidebar, text="Check For Updates", command=check_update)
 # last_c_key_button.grid(row=0, column=0, padx=5, pady=5, sticky="w")
 check_updates_button.pack(side="top", padx=5, pady=5, fill="x")
 
 # Create a button to reset all data
-reset_button = ttk.Button(submission_tab, text="Reset All Data", command=reset)
+reset_button = ctk.CTkButton(tab_control.tab("Submission"), text="Reset All Data", command=reset)
 reset_button.place(x=650, y=656)
 
 # Create a Text widget to display the answers in the Answers tab
-answers_text = tk.Text(answers_tab, width=80, height=20)
+answers_text = tk.Text(tab_control.tab("Answers"), width=80, height=20)
 answers_text.pack()
 answers_text.configure(state="disabled")  # Set the state to "disabled"
 
 # Create a StringVar to hold the selected answer
-selected_answer = StringVar()
+selected_answer = ctk.StringVar(value="")
 
 # Create a Combobox for the dropdown
-answer_dropdown = ttk.Combobox(answers_tab, style="Custom.TCombobox", textvariable=selected_answer, width=50,
-                               state="readonly")
+answer_dropdown = ctk.CTkComboBox(tab_control.tab("Answers"), variable=selected_answer, width=500, state="readonly")
 answer_dropdown.pack()
 
 
@@ -1101,11 +1106,11 @@ answer_dropdown.rows = {}
 refresh_dropdown()
 
 # Create a button to display the selected answer
-display_button = ttk.Button(answers_tab, text="Display Answer", command=display_selected_answer)
+display_button = ctk.CTkButton(tab_control.tab("Answers"), text="Display Answer", command=display_selected_answer)
 display_button.pack(padx=10, pady=1)
 
 # Create a button to refresh
-refresh_button = ttk.Button(answers_tab, text="Refresh", command=refresh_dropdown_and_text)
+refresh_button = ctk.CTkButton(tab_control.tab("Answers"), text="Refresh", command=refresh_dropdown_and_text)
 refresh_button.pack()
 
 # Bind the F11 key to toggle fullscreen
@@ -1121,7 +1126,7 @@ rows = cursor.fetchall()
 # Retrieve and display the initial data from the table in the Answers tab
 update_dropdown_with_data()
 
-close_button = ttk.Button(sidebar, text="Close", command=close_menu, width=5)
+close_button = ctk.CTkButton(sidebar, text="Close", command=close_menu, width=5)
 close_button.pack()
 
 # Run the Tkinter event loop
