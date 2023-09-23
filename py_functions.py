@@ -6,10 +6,8 @@ import pickle
 
 def create_db():
         """
-        Creates a SQLite database and table if they do not already exist.
-
-        The function first checks if the database file "other\ice-answers.db" exists in the current directory. 
-        If the file does not exist, a new SQLite database is created and a connection is established. 
+        Creates a SQLite database and table.
+        a new SQLite database is created and a connection is established. 
         Otherwise, the function will not create a new database and will proceed with the existing one.
 
         The function then creates a cursor object from the connection, which will be used to execute SQL commands. 
@@ -29,16 +27,16 @@ def create_db():
         Returns:
         None
         """
-        if not os.path.exists("ice-answers.db"):
-            # Create a connection to the SQLite database or create a new one if it doesn't exist
-            global conn
-            conn = sqlite3.connect("ice-answers.db")
-            # Create a cursor object from the connection to execute SQL commands
-            global cursor
-            cursor = conn.cursor()
+        os.remove("ice-answers.db")
+        # Create a connection to the SQLite database or create a new one if it doesn't exist
+        global conn
+        conn = sqlite3.connect("ice-answers.db")
+        # Create a cursor object from the connection to execute SQL commands
+        global cursor
+        cursor = conn.cursor()
 
-            # Define the SQL command to create the table with the specified columns
-            create_table_query = """
+         # Define the SQL command to create the table with the specified columns
+        create_table_query = """
             CREATE TABLE IF NOT EXISTS answers (
             shipper_name TEXT,
             shipper_address TEXT,
@@ -58,14 +56,14 @@ def create_db():
         );
             """
 
-            # Execute the create table command
-            cursor.execute(create_table_query)
+        # Execute the create table command
+        cursor.execute(create_table_query)
 
-            # Commit the changes and close the connection
-            conn.commit()
-            conn.close()
+        # Commit the changes and close the connection
+        conn.commit()
+        conn.close()
 
-            print("SQLite Database and Table Created Successfully.")
+        print("SQLite Database and Table Created Successfully.")
 
 
 def db_to_dict():
@@ -139,7 +137,6 @@ def delete_db():
         cursor.execute('DROP TABLE answers')
         conn.commit()
         conn.close()
-        os.remove("ice-answers.db")
         print("SQLite Database and Table Deleted Successfully")
 
 

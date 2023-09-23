@@ -16,7 +16,7 @@ import threading
 from py_functions import close_connection, create_db, db_to_dict, delete_db, display_consign_key, generate_consign_key
 import customtkinter as ctk
 from custom_widgets import CustomMessagebox
-from CTkMessagebox import CTkMessagebox
+
 
 # Functions:
 def on_rm_error(path):
@@ -49,7 +49,7 @@ def git_clone_with_progress(repo_url, destination_path):
         None
     """
     # Create a Tkinter window for the message box
-    root = tk.Tk()
+    root = ctk.CTk()
     root.withdraw()  # Hide the main window
 
     try:
@@ -345,7 +345,7 @@ def animate_sidebar(target_x):
     Parameters:
         target_x (int): The x position to animate the sidebar to.
 
-    Returns:
+    Returns: 
         None
     """
     start_x = sidebar.winfo_x()
@@ -392,11 +392,11 @@ def display_selected_answer():
             return
 
         answers_text.configure(state="normal")
-        answers_text.delete(1.0, tk.END)
+        answers_text.delete(1.0, ctk.END)
 
         # Format and display all fields of the selected answer
         for column, value in ans_dict.items():
-            answers_text.insert(tk.END, f"{column}: {value}\n")
+            answers_text.insert(ctk.END, f"{column}: {value}\n")
 
         answers_text.configure(state="disabled")
         refresh_dropdown_and_text()
@@ -583,7 +583,29 @@ def submit():
                 else:
                     print(f"Error sending notification data: {info_response.status_code} - {info_response.text}")
 
-            
+
+
+            def send_notification_and_data_in_thread(payload, completion_event):
+                """
+                Sends a push notification and data using the Pusher API in a separate thread.
+
+                Args:
+                    payload (dict): The data payload for the Pusher notification.
+                    completion_event (threading.Event): An event that will be set when the function has finished.
+
+                Returns:
+                    None
+
+                Raises:
+                    None
+                """
+                # Set the event to indicate completion
+                completion_event.set()
+
+                send_notification_and_data(payload)
+                completion_event.set()
+
+
             CustomMessagebox.showinfo("Data Submission", "Data Submitted Successfully!")
             data = {
                 'ship_name': ship_name,
@@ -601,7 +623,9 @@ def submit():
                 'ship_contact': ship_contact,
                 'rec_contact': rec_contact
             }
-            send_notification_and_data(info=data)
+            event = threading.Event()
+            send_notification_and_data_in_thread(payload=data, completion_event=event)
+            event.wait()
     except Exception as e:
         print("Error in submit function:", str(e))
         pass
@@ -831,15 +855,16 @@ background_image_path = "background.png"
 print("Background image path:", background_image_path)
 try:
     background_image = tk.PhotoImage(file=background_image_path)
+
     print("Background image loaded successfully.")
     # Create an image item on the canvas with the background image
     submission_canvas.create_image(0, 0, anchor=tk.NW, image=background_image)
-    print("Background image loaded on canvas Successfully.")
+    print("Background image loaded on canvas successfully.")
 except tk.TclError as e:
     print("Error loading background image:", str(e))
 
 # Create the sidebar (hamburger menu content)
-sidebar = tk.Frame(window, bg="lightgray", width=200)
+sidebar = ctk.CTkFrame(window, width=200)
 sidebar.place(x=-300, y=0, relheight=1, anchor=tk.NW)
 
 
@@ -1047,15 +1072,15 @@ reset_button = ctk.CTkButton(tab_control.tab("Submission"), text="Reset All Data
 reset_button.place(x=650, y=656)
 
 # Create a Text widget to display the answers in the Answers tab
-answers_text = tk.Text(tab_control.tab("Answers"), width=80, height=20)
+answers_text = ctk.CTkTextbox(tab_control.tab("Answers"), width=600, height=400)
 answers_text.pack()
 answers_text.configure(state="disabled")  # Set the state to "disabled"
 
 # Create a StringVar to hold the selected answer
-selected_answer = ctk.StringVar(value="")
+selected_answer = ctk.StringVar()
 
 # Create a Combobox for the dropdown
-answer_dropdown = ctk.CTkComboBox(tab_control.tab("Answers"), variable=selected_answer, width=500, state="readonly")
+answer_dropdown = ctk.CTkComboBox(tab_control.tab("Answers"), variable=selected_answer, width=500, state="readonly", values=[""])
 answer_dropdown.pack()
 
 
@@ -1071,7 +1096,7 @@ def refresh_dropdown():
     """
     cursor.execute('SELECT shipper_name, receiver_name FROM answers')
     shipper_receiver_names = cursor.fetchall()
-    answer_dropdown["values"] = [f"{shipper[0]} - {shipper[1]}" for shipper in shipper_receiver_names]
+    answer_dropdown.configure(values = [f"{shipper[0]} - {shipper[1]}" for shipper in shipper_receiver_names])
 
 
 # Function to update the dropdown with shipper-receiver names
@@ -1090,14 +1115,14 @@ def update_dropdown_with_data():
         None
     """
     ans = db_to_dict()
-    answer_dropdown["values"] = list(ans.keys())
+    answer_dropdown.configure(values = list(ans.keys()))
     answer_dropdown.rows = ans
 
 
 # Populate the Combobox with the shipper names from the database
 cursor.execute('SELECT shipper_name, receiver_name FROM answers')
 shipper_receiver_names = cursor.fetchall()
-answer_dropdown["values"] = [f"{shipper} - {receiver}" for shipper, receiver in shipper_receiver_names]
+answer_dropdown.configure(values = [f"{shipper} - {receiver}" for shipper, receiver in shipper_receiver_names])
 
 # Initialize 'rows' attribute for the answer_dropdown
 answer_dropdown.rows = {}
