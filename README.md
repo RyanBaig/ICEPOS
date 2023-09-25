@@ -2,8 +2,8 @@
 
 [![Release](https://badgers.space/github/release/RyanBaig/ICEPOS)](https://github.com/RyanGamingYT/ICEPOS/releases/tag/v1.4)
 ![Checks](https://badgers.space//github/checks/RyanBaig/ICEPOS)
-[![License](https://badgers.space//github/license/RyanBaigT/ICEPOS)](LICENSE.txt)
-![Issues](https://badgers.space//github/open-issues/RyanBaig/ICEPOS)
+[![License](https://badgers.space//github/license/RyanBaig/ICEPOS)](LICENSE.txt)
+![Issues](https://badgers.space/github/open-issues/RyanBaig/ICEPOS)
 ![Languages](https://img.shields.io/github/languages/top/RyanBaig/ICEPOS?style=flat-square)
 
 #
