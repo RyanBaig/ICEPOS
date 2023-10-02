@@ -8,17 +8,25 @@ from math import pi, cos
 import time
 import datetime
 import requests
-import subprocess
 import shutil
-import stat
 from ttkbootstrap.widgets import DateEntry
 import threading
-from py_functions import close_connection, create_db, db_to_dict, delete_db, display_consign_key, generate_consign_key, create_db_, update_icepos
+from py_functions import (
+    close_connection,
+    create_db,
+    db_to_dict,
+    delete_db,
+    display_consign_key,
+    generate_consign_key,
+    create_db_,
+    update_icepos,
+)
 import customtkinter as ctk
 from custom_widgets import CustomMessagebox
 
 
 # Functions:
+
 
 def check_update():
     time.sleep(1)
@@ -44,6 +52,7 @@ def check_update():
 
     CustomMessagebox.showinfo("ICEPOS Update", "ICEPOS has been updated.")
 
+
 def check_update_background():
     """
     Check for updates in the background.
@@ -68,12 +77,16 @@ def check_update_background():
     if r.status_code == 200:
         VERSION = r.json()["version"]
         if CURRENT_VERSION <= VERSION:
-            result = CustomMessagebox.askyesno("Update Needed", "An Update has been found, do you want to update ICEPOS right now?")
+            result = CustomMessagebox.askyesno(
+                "Update Needed",
+                "An Update has been found, do you want to update ICEPOS right now?",
+            )
             if result == "Yes":
                 window.destroy()
                 check_update()
         else:
             CustomMessagebox.showinfo("Update Information", "ICEPOS is up to date.")
+
 
 def start_update_check():
     # Run the update check in a separate thread
@@ -81,20 +94,19 @@ def start_update_check():
     update_thread.start()
 
 
-
 def exit_win():
-  """
-  Asks the user for confirmation and closes the connection and destroys the window if the user agrees.
+    """
+    Asks the user for confirmation and closes the connection and destroys the window if the user agrees.
 
-  Parameters:
-    None
+    Parameters:
+      None
 
-  Returns:
-    None
-  """
-  dialog = CustomMessagebox.askyesno("Confirmation", "Do you want to proceed?")
-  if dialog == "Yes":
-    window.destroy()
+    Returns:
+      None
+    """
+    dialog = CustomMessagebox.askyesno("Confirmation", "Do you want to proceed?")
+    if dialog == "Yes":
+        window.destroy()
 
 
 def reset():
@@ -129,10 +141,10 @@ def toggle_fullscreen():
     """
     Toggle the fullscreen mode of the window.
 
-    This function checks if the window is currently in fullscreen mode using the 
-    `attributes` method with the argument '-fullscreen'. If the window is already in 
-    fullscreen mode, it sets the '-fullscreen' attribute to False to toggle it off. 
-    If the window is not in fullscreen mode, it sets the '-fullscreen' attribute to 
+    This function checks if the window is currently in fullscreen mode using the
+    `attributes` method with the argument '-fullscreen'. If the window is already in
+    fullscreen mode, it sets the '-fullscreen' attribute to False to toggle it off.
+    If the window is not in fullscreen mode, it sets the '-fullscreen' attribute to
     True to toggle it on.
 
     Parameters:
@@ -141,10 +153,10 @@ def toggle_fullscreen():
     Returns:
         None
     """
-    if window.attributes('-fullscreen'):
-        window.attributes('-fullscreen', False)
-    elif not window.attributes('-fullscreen'):
-        window.attributes('-fullscreen', True)
+    if window.attributes("-fullscreen"):
+        window.attributes("-fullscreen", False)
+    elif not window.attributes("-fullscreen"):
+        window.attributes("-fullscreen", True)
 
 
 def get_username():
@@ -165,15 +177,17 @@ def get_username():
 def change_profile_pic():
     """
     Opens a file dialog to allow the user to select an image file and change the profile picture.
-    
+
     Parameters:
         None
-        
+
     Returns:
         None
     """
-    file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.jpg *.jpeg *.png *.svg")])
-    
+    file_path = filedialog.askopenfilename(
+        filetypes=[("Image files", "*.jpg *.jpeg *.png *.svg")]
+    )
+
     if file_path == "C:/Users/Hp/Projects/ICEPOS/media/images/default_profile.png":
         pass
     elif file_path:
@@ -192,7 +206,7 @@ def change_profile_pic():
         # Save the selected image path to a file
         with open(file="selected_image_path.txt", mode="w") as file:
             file.write(file_path)
-        
+
         profile_b.image = circular_image_tk
         profile_b.config(image=circular_image_tk)
 
@@ -235,7 +249,7 @@ def animate_sidebar(target_x):
     Parameters:
         target_x (int): The x position to animate the sidebar to.
 
-    Returns: 
+    Returns:
         None
     """
     start_x = sidebar.winfo_x()
@@ -301,16 +315,16 @@ def refresh_dropdown_and_text():
     """
     Refreshes the dropdown menu and text fields with data from the database.
     If there are no records in the database, no changes are made.
-    
+
     Parameters:
         None
-        
+
     Returns:
         None
     """
     try:
         # Fetch data from the database
-        cursor.execute('SELECT * FROM answers')
+        cursor.execute("SELECT * FROM answers")
         rows = cursor.fetchall()
 
         # If there are no records in the database, return without making any changes
@@ -345,7 +359,7 @@ def refresh_dropdown_and_text():
                     "Shipment Service": row[5],
                     "Number of Pieces": row[12],
                     "Shipment Weight": row[10],
-                    "Shipment Charges": row[11]
+                    "Shipment Charges": row[11],
                 }
 
         answer_dropdown["values"] = valid_shipper_receiver_names
@@ -359,10 +373,10 @@ def refresh_dropdown_and_text():
 def submit():
     """
     Submit the form data to the database, send notifications, and display success message.
-    
+
     Returns:
         None
-    
+
     Raises:
         None
     """
@@ -384,11 +398,30 @@ def submit():
         rec_contact = entry_rec_contact.get()
 
         # Check if any field is empty
-        if any(value == '' for value in [ship_name, ship_address, ship_desc, ship_dest, ship_serv, rec_name, rec_address, rec_zipcode, ship_weight, ship_charges, no_of_pieces, date, ship_contact, rec_contact]):
+        if any(
+            value == ""
+            for value in [
+                ship_name,
+                ship_address,
+                ship_desc,
+                ship_dest,
+                ship_serv,
+                rec_name,
+                rec_address,
+                rec_zipcode,
+                ship_weight,
+                ship_charges,
+                no_of_pieces,
+                date,
+                ship_contact,
+                rec_contact,
+            ]
+        ):
             CustomMessagebox.showerror("Error", "All fields are required!")
         else:
             # Insert the data into the database
-            cursor.execute(f"""
+            cursor.execute(
+                f"""
                 INSERT INTO answers (
                     shipper_name,
                     shipper_address,
@@ -406,7 +439,25 @@ def submit():
                     date,
                     consign_identifier
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-""", (ship_name, ship_address, ship_contact, ship_desc, ship_dest, ship_serv, rec_name, rec_address, rec_contact, rec_zipcode, ship_weight, ship_charges, no_of_pieces, date, generate_consign_key()))
+""",
+                (
+                    ship_name,
+                    ship_address,
+                    ship_contact,
+                    ship_desc,
+                    ship_dest,
+                    ship_serv,
+                    rec_name,
+                    rec_address,
+                    rec_contact,
+                    rec_zipcode,
+                    ship_weight,
+                    ship_charges,
+                    no_of_pieces,
+                    date,
+                    generate_consign_key(),
+                ),
+            )
 
             conn.commit()  # Commit the changes to the database
             # Refresh the dropdown and display the updated data in the Text widget
@@ -415,99 +466,120 @@ def submit():
             def send_notification_and_data(info):
                 """
                 Send a push notification and data to the specified URL and headers using the Pusher API.
-                
+
                 Args:
                     info (dict): The data payload for the Pusher notification.
-                    
+
                 Returns:
                     None
-                    
+
                 Raises:
                     None
                 """
                 import json
+
                 # Define the URL and headers for the Pusher notification
                 pusher_url = "https://bd6732cb-f1df-40a9-bf10-1b39a5beeb90.pushnotifications.pusher.com/publish_api/v1/instances/bd6732cb-f1df-40a9-bf10-1b39a5beeb90/publishes"
                 pusher_headers = {
                     "Content-Type": "application/json",
-                    "Authorization": "Bearer 7A770E61F964B0D25F15CB9470F250EEFF9486967B17E7CF636C25E1ED1E122E"
+                    "Authorization": "Bearer 7A770E61F964B0D25F15CB9470F250EEFF9486967B17E7CF636C25E1ED1E122E",
                 }
 
                 # Define the data payload for the Pusher notification
                 pusher_data = {
-                                "interests": ["hello"],
-                                "web": {
-                                    "notification": {
-                                        "title": "New Shipment Booked",
-                                        "body": "Hello, A new Shipment has been booked.",
-                                        "deep_link": "https://ice-auth.ryanbaig.repl.co/notifications"
-                                    }
-                                }
-                            }
-
+                    "interests": ["hello"],
+                    "web": {
+                        "notification": {
+                            "title": "New Shipment Booked",
+                            "body": "Hello, A new Shipment has been booked.",
+                            "deep_link": "https://ice-auth.ryanbaig.repl.co/notifications",
+                        }
+                    },
+                }
 
                 # Send the POST request with JSON data for Pusher notification
-                pusher_response = requests.post(pusher_url, headers=pusher_headers, json=pusher_data)
+                pusher_response = requests.post(
+                    pusher_url, headers=pusher_headers, json=pusher_data
+                )
 
                 # Check the response for Pusher notification
                 if pusher_response.status_code == 200:
                     print("Pusher notification sent successfully.")
                 else:
-                    print(f"Error sending Pusher notification: {pusher_response.status_code} - {pusher_response.text}")
+                    print(
+                        f"Error sending Pusher notification: {pusher_response.status_code} - {pusher_response.text}"
+                    )
 
                 # Define the headers with Content-Type as application/json for the second request
-                info_headers = {
-                    "Content-Type": "application/json"
-                }
+                info_headers = {"Content-Type": "application/json"}
 
                 json_info = json.dumps(info)
 
                 # Send an empty JSON object as the request body for the second request
                 info_url = "https://ice-auth.ryanbaig.repl.co/notifications"
-                info_response = requests.post(info_url, data=json_info, headers=info_headers)
+                info_response = requests.post(
+                    info_url, data=json_info, headers=info_headers
+                )
 
                 # Check the response for the second request
                 if info_response.status_code == 200:
                     print("Notification data sent successfully.")
-                    CustomMessagebox.showinfo("Notification Sent", "Notification with the data has been sent to those concerned.")
+                    CustomMessagebox.showinfo(
+                        "Notification Sent",
+                        "Notification with the data has been sent to those concerned.",
+                    )
                 else:
-                    print(f"Error sending notification data: {info_response.status_code} - {info_response.text}")
-
-
-
-
+                    print(
+                        f"Error sending notification data: {info_response.status_code} - {info_response.text}"
+                    )
 
             CustomMessagebox.showinfo("Data Submission", "Data Submitted Successfully!")
             data_payload = {
-                'ship_name': ship_name,
-                'ship_address': ship_address,
-                'ship_desc': ship_desc,
-                'ship_dest': ship_dest,
-                'ship_serv': ship_serv,
-                'rec_name': rec_name,
-                'rec_address': rec_address,
-                'rec_zipcode': rec_zipcode,
-                'ship_weight': ship_weight,
-                'ship_charges': ship_charges,
-                'no_of_pieces': no_of_pieces,
-                'date': date,
-                'ship_contact': ship_contact,
-                'rec_contact': rec_contact
+                "ship_name": ship_name,
+                "ship_address": ship_address,
+                "ship_desc": ship_desc,
+                "ship_dest": ship_dest,
+                "ship_serv": ship_serv,
+                "rec_name": rec_name,
+                "rec_address": rec_address,
+                "rec_zipcode": rec_zipcode,
+                "ship_weight": ship_weight,
+                "ship_charges": ship_charges,
+                "no_of_pieces": no_of_pieces,
+                "date": date,
+                "ship_contact": ship_contact,
+                "rec_contact": rec_contact,
             }
-            thread = threading.Thread(target=send_notification_and_data(info=data_payload))
+            thread = threading.Thread(
+                target=send_notification_and_data(info=data_payload)
+            )
             thread.start()
     except Exception as e:
         print("Error in submit function:", str(e))
         pass
 
 
-
 # Function to create a formatted image
-def create_formatted_image(ship_name, ship_address, ship_desc, ship_dest, ship_serv, rec_name, rec_address, rec_zipcode,
-                           ship_weight, ship_charges, no_of_pieces, date, ship_contact, rec_contact, serial_no):
+def create_formatted_image(
+    ship_name,
+    ship_address,
+    ship_desc,
+    ship_dest,
+    ship_serv,
+    rec_name,
+    rec_address,
+    rec_zipcode,
+    ship_weight,
+    ship_charges,
+    no_of_pieces,
+    date,
+    ship_contact,
+    rec_contact,
+    serial_no,
+):
     """
     Create a formatted image using the given information and save it as a PNG file.
-    
+
     Args:
         ship_name (str): The name of the ship.
         ship_address (str): The address of the ship.
@@ -524,7 +596,7 @@ def create_formatted_image(ship_name, ship_address, ship_desc, ship_dest, ship_s
         ship_contact (str): The contact information of the ship.
         rec_contact (str): The contact information of the recipient.
         serial_no (str): The serial number of the shipment.
-        
+
     Returns:
         None
     """
@@ -554,7 +626,7 @@ def create_formatted_image(ship_name, ship_address, ship_desc, ship_dest, ship_s
         "date": (697, 180),
         "ship_contact": (45, 490),
         "rec_contact": (725, 573),
-        "serial_no": (1100, 180)
+        "serial_no": (1100, 180),
     }
 
     # Draw the text on the image
@@ -572,7 +644,9 @@ def create_formatted_image(ship_name, ship_address, ship_desc, ship_dest, ship_s
     draw.text(coordinates["date"], f"{date}", fill=(0, 0, 0), font=font)
     draw.text(coordinates["ship_contact"], f"{ship_contact}", fill=(0, 0, 0), font=font)
     draw.text(coordinates["rec_contact"], f"{rec_contact}", fill=(0, 0, 0), font=font)
-    draw.text(coordinates["serial_no"], f"{generate_consign_key()}", fill=(0, 0, 0), font=font)
+    draw.text(
+        coordinates["serial_no"], f"{generate_consign_key()}", fill=(0, 0, 0), font=font
+    )
 
     # Save the formatted image
     current_date = datetime.date.today().strftime("%d--%m--%Y")
@@ -599,6 +673,7 @@ def print_image(image_path):
         CustomMessagebox.showinfo("Printing", "Formatted image sent to printer.")
     except Exception as e:
         CustomMessagebox.showerror("Printing Error", str(e))
+
 
 def generate_airway_bill_with_terms_and_conditions():
     """
@@ -630,9 +705,10 @@ def generate_airway_bill_with_terms_and_conditions():
     combined_image.paste(image_top, (0, 0))
     combined_image.paste(image_bottom, (0, height))
 
-
     # generate the date aka the file name
-    current_date = datetime.date.today().strftime('%d--%m--%Y')  # Format the date as needed
+    current_date = datetime.date.today().strftime(
+        "%d--%m--%Y"
+    )  # Format the date as needed
 
     # Save the combined image
     combined_image.save(f"{current_date}.png")
@@ -665,23 +741,50 @@ def print_formatted_image():
     rec_contact = entry_rec_contact.get()
 
     # Create a formatted image
-    entries = [entry_ship_name, entry_ship_address, entry_ship_desc, entry_ship_dest, entry_ship_serv,
-               entry_rec_name, entry_rec_address, entry_rec_zipcode, entry_ship_weight, entry_ship_charges,
-               entry_no_of_pieces,
-            entry_ship_contact, entry_rec_contact]
+    entries = [
+        entry_ship_name,
+        entry_ship_address,
+        entry_ship_desc,
+        entry_ship_dest,
+        entry_ship_serv,
+        entry_rec_name,
+        entry_rec_address,
+        entry_rec_zipcode,
+        entry_ship_weight,
+        entry_ship_charges,
+        entry_no_of_pieces,
+        entry_ship_contact,
+        entry_rec_contact,
+    ]
     values = [entry.get() for entry in entries] + [entry_date.entry.get()]
-    if any(value == '' for value in values):
+    if any(value == "" for value in values):
         CustomMessagebox.showerror("Error", "All fields are required!")
     else:
-        create_formatted_image(ship_name, ship_address, ship_desc, ship_dest, ship_serv, rec_name, rec_address,
-                               rec_zipcode, ship_weight, ship_charges, no_of_pieces, date, ship_contact, rec_contact,
-                               generate_consign_key())
+        create_formatted_image(
+            ship_name,
+            ship_address,
+            ship_desc,
+            ship_dest,
+            ship_serv,
+            rec_name,
+            rec_address,
+            rec_zipcode,
+            ship_weight,
+            ship_charges,
+            no_of_pieces,
+            date,
+            ship_contact,
+            rec_contact,
+            generate_consign_key(),
+        )
 
         # Print the formatted image
         try:
             generate_airway_bill_with_terms_and_conditions()
-            current_date = datetime.date.today().strftime('%d--%m--%Y')  # Format the date as needed
-            print_image(f'{current_date}.png')
+            current_date = datetime.date.today().strftime(
+                "%d--%m--%Y"
+            )  # Format the date as needed
+            print_image(f"{current_date}.png")
             os.remove(f"{current_date}.png")
         except Exception as e:
             CustomMessagebox.showerror("Printing Error", str(e))
@@ -710,7 +813,7 @@ tab_control = ctk.CTkTabview(window)
 
 # Create the Submission tab
 
-tab_control.add('Submission')
+tab_control.add("Submission")
 
 # Add the Tab Control to the window
 tab_control.pack(expand=1, fill="both")
@@ -740,11 +843,22 @@ sidebar.place(x=-300, y=0, relheight=1, anchor=tk.NW)
 
 # Create the hamburger button using the PNG icon
 menu_icon = ctk.CTkImage(Image.open("menu.png"))
-hamburger = ctk.CTkButton(submission_canvas, image=menu_icon, command=toggle_menu, text="", height=32, width=32)
-hamburger.place(anchor=tk.NW, )  # Position the hamburger button in the top-left corner
+hamburger = ctk.CTkButton(
+    submission_canvas,
+    image=menu_icon,
+    command=toggle_menu,
+    text="",
+    height=32,
+    width=32,
+)
+hamburger.place(
+    anchor=tk.NW,
+)  # Position the hamburger button in the top-left corner
 
 # Label for personal info
-personal_info_label = ctk.CTkLabel(sidebar, text="Personal Information", font=("Arial", 15))
+personal_info_label = ctk.CTkLabel(
+    sidebar, text="Personal Information", font=("Arial", 15)
+)
 personal_info_label.pack(pady=2)
 
 # Load the saved image path
@@ -770,72 +884,109 @@ if saved_image_path:
 else:
     circular_image = Image.open("default_profile.png")
 
-circular_image_tk = ctk.CTkImage(circular_image, size=(120,120))
+circular_image_tk = ctk.CTkImage(circular_image, size=(120, 120))
 
 
 # Create the profile button
-profile_b = ctk.CTkButton(sidebar, image=circular_image_tk, command=change_profile_pic, text="", height=120, width=120)
+profile_b = ctk.CTkButton(
+    sidebar,
+    image=circular_image_tk,
+    command=change_profile_pic,
+    text="",
+    height=120,
+    width=120,
+)
 profile_b.image = circular_image_tk
 profile_b.place()
 
 # Shipper name (1)
-entry_ship_name = ctk.CTkEntry(tab_control.tab("Submission"), width=550, font=("Arial", 14))
+entry_ship_name = ctk.CTkEntry(
+    tab_control.tab("Submission"), width=550, font=("Arial", 14)
+)
 entry_ship_name.place(x=45, y=210)
 
 # Shipper Address (2)
 entry_ship_address = ctk.StringVar()
-entry_ship_address_entry = ctk.CTkEntry(tab_control.tab("Submission"), width=550, font=("Arial", 14),
-                                     textvariable=entry_ship_address)
+entry_ship_address_entry = ctk.CTkEntry(
+    tab_control.tab("Submission"),
+    width=550,
+    font=("Arial", 14),
+    textvariable=entry_ship_address,
+)
 entry_ship_address_entry.place(x=45, y=305)
 
 # Shipment Description (3)
-entry_ship_desc = ctk.CTkEntry(tab_control.tab("Submission"), width=550, font=("Arial", 14))
+entry_ship_desc = ctk.CTkEntry(
+    tab_control.tab("Submission"), width=550, font=("Arial", 14)
+)
 entry_ship_desc.place(x=45, y=395)
 
 # Shipment Contact # (4)
-entry_ship_contact = ctk.CTkEntry(tab_control.tab("Submission"), width=240, font=("Arial", 14))
+entry_ship_contact = ctk.CTkEntry(
+    tab_control.tab("Submission"), width=240, font=("Arial", 14)
+)
 entry_ship_contact.place(x=45, y=490)
 
 # Shipment Date (5)
-entry_date = DateEntry(tab_control.tab("Submission"), bootstyle='primary', width=37)
+entry_date = DateEntry(tab_control.tab("Submission"), bootstyle="primary", width=37)
 entry_date.place(x=697, y=190)
 
 # Shipment Destination (6)
-entry_ship_dest = ctk.CTkEntry(tab_control.tab("Submission"), width=280, font=("Arial", 14))
+entry_ship_dest = ctk.CTkEntry(
+    tab_control.tab("Submission"), width=280, font=("Arial", 14)
+)
 entry_ship_dest.place(x=700, y=270)
 
 # Shipment Service (7)
-entry_ship_serv = ctk.CTkEntry(tab_control.tab("Submission"), width=180, font=("Arial", 14))
+entry_ship_serv = ctk.CTkEntry(
+    tab_control.tab("Submission"), width=180, font=("Arial", 14)
+)
 entry_ship_serv.place(x=1100, y=270)
 
 # Receiver Name (8)
-entry_rec_name = ctk.CTkEntry(tab_control.tab("Submission"), width=550, font=("Arial", 14))
+entry_rec_name = ctk.CTkEntry(
+    tab_control.tab("Submission"), width=550, font=("Arial", 14)
+)
 entry_rec_name.place(x=700, y=375)
 
 # Receiver Address (9)
 entry_rec_address = ctk.StringVar()
-entry_rec_address_entry = ctk.CTkEntry(tab_control.tab("Submission"), width=550, font=("Arial", 14),
-                                    textvariable=entry_rec_address)
+entry_rec_address_entry = ctk.CTkEntry(
+    tab_control.tab("Submission"),
+    width=550,
+    font=("Arial", 14),
+    textvariable=entry_rec_address,
+)
 entry_rec_address_entry.place(x=700, y=470)
 
 # Receiver Zipcode (10)
-entry_rec_zipcode = ctk.CTkEntry(tab_control.tab("Submission"), width=200, font=("Arial", 14))
+entry_rec_zipcode = ctk.CTkEntry(
+    tab_control.tab("Submission"), width=200, font=("Arial", 14)
+)
 entry_rec_zipcode.place(x=1052, y=580)
 
 # Shipment Weight (11)
-entry_ship_weight = ctk.CTkEntry(tab_control.tab("Submission"), width=140, font=("Arial", 14))
+entry_ship_weight = ctk.CTkEntry(
+    tab_control.tab("Submission"), width=140, font=("Arial", 14)
+)
 entry_ship_weight.place(x=45, y=595)
 
 # Shipment Charges (12)
-entry_ship_charges = ctk.CTkEntry(tab_control.tab("Submission"), width=150, font=("Arial", 14))
+entry_ship_charges = ctk.CTkEntry(
+    tab_control.tab("Submission"), width=150, font=("Arial", 14)
+)
 entry_ship_charges.place(x=470, y=595)
 
 # No. of Pieces (13)
-entry_no_of_pieces = ctk.CTkEntry(tab_control.tab("Submission"), width=130, font=("Arial", 14))
+entry_no_of_pieces = ctk.CTkEntry(
+    tab_control.tab("Submission"), width=130, font=("Arial", 14)
+)
 entry_no_of_pieces.place(x=260, y=595)
 
 # Consignee Contact (14)
-entry_rec_contact = ctk.CTkEntry(tab_control.tab("Submission"), width=200, font=("Arial", 14))
+entry_rec_contact = ctk.CTkEntry(
+    tab_control.tab("Submission"), width=200, font=("Arial", 14)
+)
 entry_rec_contact.place(x=725, y=577)
 
 # Create a connection to the SQLite database
@@ -844,24 +995,42 @@ conn = sqlite3.connect("ice-answers.db")
 # Create a cursor object from the connection
 cursor = conn.cursor()
 
-fields = ["Shipper Name", "Shipper Address", "Shipment Description", "Shipment Destination", "Shipment Service",
-          "Receiver Name", "Receiver Address", "Receiver Zipcode", "Shipment Weight", "Shipment Charges"]
+fields = [
+    "Shipper Name",
+    "Shipper Address",
+    "Shipment Description",
+    "Shipment Destination",
+    "Shipment Service",
+    "Receiver Name",
+    "Receiver Address",
+    "Receiver Zipcode",
+    "Shipment Weight",
+    "Shipment Charges",
+]
 
 # Create Submit Button
-submit_button = ctk.CTkButton(tab_control.tab("Submission"), text="Submit", width=10,
-                           command=lambda: [submit(), refresh_dropdown_and_text()])
+submit_button = ctk.CTkButton(
+    tab_control.tab("Submission"),
+    text="Submit",
+    width=10,
+    command=lambda: [submit(), refresh_dropdown_and_text()],
+)
 submit_button.place(x=600, y=600)
 
 # Create Print Button
-print_button = ctk.CTkButton(tab_control.tab("Submission"), text="Print", width=10,
-                          command=lambda: [print_formatted_image(), refresh_dropdown_and_text()])
+print_button = ctk.CTkButton(
+    tab_control.tab("Submission"),
+    text="Print",
+    width=10,
+    command=lambda: [print_formatted_image(), refresh_dropdown_and_text()],
+)
 print_button.place(x=710, y=600)
 
 # Bind the close event of the window to close_connection function
 window.protocol("WM_DELETE_WINDOW", close_connection)
 
 # Create an Answers tab
-tab_control.add('Answers')
+tab_control.add("Answers")
 
 # Create a button to input name
 name_button = ctk.CTkButton(sidebar, text="Your Username", command=get_username)
@@ -883,26 +1052,32 @@ if saved_username:
 
 # Create a new tab in the existing ctk.Notebook widget for the "Tracking" tab
 
-tab_control.add('Tracking')
+tab_control.add("Tracking")
 
 # Design and add UI elements for tracking
-tracking_label = ctk.CTkLabel(tab_control.tab("Tracking"), text="Enter Tracking Number:", font=("Arial", 15))
+tracking_label = ctk.CTkLabel(
+    tab_control.tab("Tracking"), text="Enter Tracking Number:", font=("Arial", 15)
+)
 tracking_label.pack(pady=10)
 
-tracking_entry = ctk.CTkEntry(tab_control.tab("Tracking"), width=300, font=("Arial", 14))
+tracking_entry = ctk.CTkEntry(
+    tab_control.tab("Tracking"), width=300, font=("Arial", 14)
+)
 tracking_entry.pack(pady=5)
+
 
 def track_package():
     """
-    Retrieves the tracking number from the tracking_entry widget and uses it to make an API request to retrieve tracking information for a package. 
+    Retrieves the tracking number from the tracking_entry widget and uses it to make an API request to retrieve tracking information for a package.
 
     :return: None
     """
     # Retrieve the tracking number from tracking_entry.get()
     tracking_number = tracking_entry.get()
-    url = "https://aftership.com/track/"+tracking_number
+    url = "https://aftership.com/track/" + tracking_number
 
     import webbrowser
+
     webbrowser.open(url)
 
 
@@ -920,26 +1095,37 @@ def track_package_thread():
     tracking_thread = threading.Thread(target=track_package)
     tracking_thread.start()
 
-tracking_button = ctk.CTkButton(tab_control.tab("Tracking"), text="Track", width=10, command=track_package_thread)
+
+tracking_button = ctk.CTkButton(
+    tab_control.tab("Tracking"), text="Track", width=10, command=track_package_thread
+)
 tracking_button.pack(pady=5)
 
 # Create a button to toggle fullscreen
-fullscreen_button = ctk.CTkButton(sidebar, text="Toggle Fullscreen", command=toggle_fullscreen)
+fullscreen_button = ctk.CTkButton(
+    sidebar, text="Toggle Fullscreen", command=toggle_fullscreen
+)
 # fullscreen_button.grid(row=0, column=0, padx=5, pady=5, sticky="w")
 fullscreen_button.pack(side="top", padx=5, pady=5, fill="x")
 
 # Create a button to show last used consign key
-last_c_key_button = ctk.CTkButton(sidebar, text="Show Last Used Consign Key", command=display_consign_key)
+last_c_key_button = ctk.CTkButton(
+    sidebar, text="Show Last Used Consign Key", command=display_consign_key
+)
 # last_c_key_button.grid(row=0, column=0, padx=5, pady=5, sticky="w")
 last_c_key_button.pack(side="top", padx=5, pady=5, fill="x")
 
 # Create a button to check for updates
-check_updates_button = ctk.CTkButton(sidebar, text="Check For Updates", command=start_update_check)
+check_updates_button = ctk.CTkButton(
+    sidebar, text="Check For Updates", command=start_update_check
+)
 # last_c_key_button.grid(row=0, column=0, padx=5, pady=5, sticky="w")
 check_updates_button.pack(side="top", padx=5, pady=5, fill="x")
 
 # Create a button to reset all data
-reset_button = ctk.CTkButton(tab_control.tab("Submission"), text="Reset All Data", command=reset)
+reset_button = ctk.CTkButton(
+    tab_control.tab("Submission"), text="Reset All Data", command=reset
+)
 reset_button.place(x=650, y=656)
 
 # Create a Text widget to display the answers in the Answers tab
@@ -951,7 +1137,13 @@ answers_text.configure(state="disabled")  # Set the state to "disabled"
 selected_answer = ctk.StringVar()
 
 # Create a Combobox for the dropdown
-answer_dropdown = ctk.CTkComboBox(tab_control.tab("Answers"), variable=selected_answer, width=500, state="readonly", values=[""])
+answer_dropdown = ctk.CTkComboBox(
+    tab_control.tab("Answers"),
+    variable=selected_answer,
+    width=500,
+    state="readonly",
+    values=[""],
+)
 answer_dropdown.pack()
 
 
@@ -965,9 +1157,11 @@ def refresh_dropdown():
     Returns:
     None
     """
-    cursor.execute('SELECT shipper_name, receiver_name FROM answers')
+    cursor.execute("SELECT shipper_name, receiver_name FROM answers")
     shipper_receiver_names = cursor.fetchall()
-    answer_dropdown.configure(values = [f"{shipper[0]} - {shipper[1]}" for shipper in shipper_receiver_names])
+    answer_dropdown.configure(
+        values=[f"{shipper[0]} - {shipper[1]}" for shipper in shipper_receiver_names]
+    )
 
 
 # Function to update the dropdown with shipper-receiver names
@@ -986,16 +1180,19 @@ def update_dropdown_with_data():
         None
     """
     ans = db_to_dict()
-    answer_dropdown.configure(values = list(ans.keys()))
+    answer_dropdown.configure(values=list(ans.keys()))
     answer_dropdown.rows = ans
+
 
 try:
     # Populate the Combobox with the shipper names from the database
-    cursor.execute('SELECT shipper_name, receiver_name FROM answers')
+    cursor.execute("SELECT shipper_name, receiver_name FROM answers")
 except sqlite3.OperationalError as e:
     create_db_()
 shipper_receiver_names = cursor.fetchall()
-answer_dropdown.configure(values = [f"{shipper} - {receiver}" for shipper, receiver in shipper_receiver_names])
+answer_dropdown.configure(
+    values=[f"{shipper} - {receiver}" for shipper, receiver in shipper_receiver_names]
+)
 
 # Initialize 'rows' attribute for the answer_dropdown
 answer_dropdown.rows = {}
@@ -1004,11 +1201,15 @@ answer_dropdown.rows = {}
 refresh_dropdown()
 
 # Create a button to display the selected answer
-display_button = ctk.CTkButton(tab_control.tab("Answers"), text="Display Answer", command=display_selected_answer)
+display_button = ctk.CTkButton(
+    tab_control.tab("Answers"), text="Display Answer", command=display_selected_answer
+)
 display_button.pack(padx=10, pady=1)
 
 # Create a button to refresh
-refresh_button = ctk.CTkButton(tab_control.tab("Answers"), text="Refresh", command=refresh_dropdown_and_text)
+refresh_button = ctk.CTkButton(
+    tab_control.tab("Answers"), text="Refresh", command=refresh_dropdown_and_text
+)
 refresh_button.pack()
 
 # Bind the F11 key to toggle fullscreen
@@ -1018,7 +1219,7 @@ window.bind("<F11>", lambda event: toggle_fullscreen())
 window.bind("<Escape>", lambda event: exit_win())
 
 # Retrieve and display the initial data from the table in the Answers tab
-cursor.execute('SELECT * FROM answers')
+cursor.execute("SELECT * FROM answers")
 rows = cursor.fetchall()
 
 # Retrieve and display the initial data from the table in the Answers tab
