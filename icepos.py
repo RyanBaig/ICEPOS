@@ -1065,6 +1065,11 @@ tracking_entry = ctk.CTkEntry(
 )
 tracking_entry.pack(pady=5)
 
+tracking_dropdown = ctk.CTkOptionMenu(
+    tab_control.tab("Tracking"), values=["Select the Courier Company", "UPS", "DHL", "FedEx", "TCS", "DPD", "First Flight Courier"], width=300
+)
+tracking_dropdown.pack(pady=5)
+
 
 def track_package():
     """
@@ -1073,12 +1078,29 @@ def track_package():
     :return: None
     """
     # Retrieve the tracking number from tracking_entry.get()
+    courier = tracking_dropdown.get()
     tracking_number = tracking_entry.get()
-    url = "https://aftership.com/track/" + tracking_number
-
+    url = ""
+    if courier == "Select the Courier Company":
+        CustomMessagebox.showerror("Error", "Please select a courier company!")
+    elif courier == "UPS":
+        url = "https://www.ups.com/track?track=yes&trackNums=" + tracking_number
+    elif courier == "DHL":
+        url = "https://www.dhl.com/pk-en/home/tracking.html?tracking-id=" + tracking_number
+    elif courier == "FedEx":
+        url = "https://www.fedex.com/fedextrack/?trknbr=" + tracking_number
+    elif courier == "TCS":
+        url = "https://www.tcsexpress.com/track/" + tracking_number
+    elif courier == "DPD":
+        url = "https://track.dpd.co.uk"
+    elif courier == "First Flight Courier":
+        url = "https://firstflightcourier.com.pk/shipment-track.php?FFCODE=" + tracking_number + "&find.x=59&find.y=11"
     import webbrowser
-
+    
     webbrowser.open(url)
+    
+
+    
 
 
 # Function to initiate tracking in a separate thread
