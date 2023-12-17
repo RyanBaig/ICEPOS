@@ -176,41 +176,6 @@ def get_username():
         name_button.configure(text=str(name))
 
 
-def change_profile_pic():
-    """
-    Opens a file dialog to allow the user to select an image file and change the profile picture.
-
-    Parameters:
-        None
-
-    Returns:
-        None
-    """
-    file_path = filedialog.askopenfilename(
-        filetypes=[("Image files", "*.jpg *.jpeg *.png *.svg")]
-    )
-
-    if file_path == "C:/Users/Hp/Projects/ICEPOS/media/images/default_profile.png":
-        pass
-    elif file_path:
-        rectangular_image = Image.open(file_path)
-        resized_image = rectangular_image.resize((120, 120), Image.LANCZOS)
-
-        mask = Image.new("L", (120, 120), 0)
-        draw = ImageDraw.Draw(mask)
-        draw.ellipse((0, 0, 120, 120), fill=255)
-
-        circular_image = Image.new("RGBA", (120, 120))
-        circular_image.paste(resized_image, (0, 0), mask)
-
-        circular_image_tk = ImageTk.PhotoImage(circular_image)
-
-        # Save the selected image path to a file
-        with open(file="selected_image_path.txt", mode="w") as file:
-            file.write(file_path)
-
-        profile_b.image = circular_image_tk
-        profile_b.config(image=circular_image_tk)
 
 
 def toggle_menu():
