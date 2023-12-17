@@ -9,6 +9,8 @@ import time
 import datetime
 import requests
 import shutil
+import subprocess
+import pyautogui
 from ttkbootstrap.widgets import DateEntry
 import threading
 from py_functions import (
@@ -24,7 +26,7 @@ from py_functions import (
 import customtkinter as ctk
 from custom_widgets import CustomMessagebox
 
-
+current_date = datetime.date.today().strftime("%d--%m--%Y")
 # Functions:
 
 
@@ -606,10 +608,10 @@ def create_formatted_image(
 
     # Create a drawing context
     draw = ImageDraw.Draw(background_img)
-
+    print("drawn")
     # Set the font
     font = ImageFont.truetype("arial.ttf", 20)
-
+    print("font")
     # Define the coordinates for placing text on the image
     coordinates = {
         "ship_name": (45, 210),
@@ -647,9 +649,9 @@ def create_formatted_image(
     draw.text(
         coordinates["serial_no"], f"{generate_consign_key()}", fill=(0, 0, 0), font=font
     )
-
+    print("text drawn")
     # Save the formatted image
-    current_date = datetime.date.today().strftime("%d--%m--%Y")
+    
     background_img.save(f"{current_date}.png")
 
     # Show a message box indicating the image creation
@@ -668,7 +670,18 @@ def print_image(image_path):
         None
     """
     try:
-        os.startfile(image_path, "print")
+        path = os.path.abspath(image_path)
+        print(path)
+        cmd = f'start {path}'
+        print(cmd)
+        # Open the combined image using the default photo viewer
+        os.system(cmd)
+
+        # Wait for the File Explorer window to open
+        time.sleep(1)
+
+        # Simulate keypress to trigger print dialog (Ctrl+P)
+        pyautogui.hotkey('ctrl', 'p')
 
         CustomMessagebox.showinfo("Printing", "Formatted image sent to printer.")
     except Exception as e:
@@ -677,42 +690,47 @@ def print_image(image_path):
 
 def generate_airway_bill_with_terms_and_conditions():
     """
-    Generates an airway bill with terms and conditions.
+   This function takes two images, a top image and a bottom image, and combines them into a single image. The combined image
+   has the top image in the top-left corner, the bottom image in the bottom-left corner, the top image in the top-right corner,
+   and the bottom image in the bottom-right corner. The combined image is then saved in the user's Documents folder under the
+   Airway Bills subfolder, using the current date as the filename.
 
-    Opens two images, `printable_image.png` and `terms_and_conditions.png`, and combines them into a single image.
-    The `terms_and_conditions.png` image is resized to a width of 1350 and a height of 700 to match the dimensions of the `printable_image.png` image.
-    The dimensions of the `printable_image.png` image are obtained using the `size()` method.
-    A new image with the combined height of the two images is created using the `new()` method.
-    The `paste()` method is used to paste the `printable_image.png` image on top and the `terms_and_conditions.png` image at the bottom of the combined image.
-    The current date is obtained using the `date.today()` method and formatted as `dd--mm--YYYY`.
-    The combined image is saved with the filename as the current date in the format `dd--mm--YYYY.png`.
-    """
+   Args:
+       None
+
+   Returns:
+       None
+
+   Raises:
+       None
+   """
     # Open the two images you want to combine
-    image_top = Image.open("printable_image.png")
+    image_top = Image.open(f"{current_date}.png")
+    image_top.thumbnail((1350, 700))
     image_bottom = Image.open("terms_and_conditions.png")
-    image_bottom.resize((1350, 700))
+    image_bottom.thumbnail((1350, 700))
 
     # Get the dimensions of the images
-    width, height = image_top.size
+    width, height = 1350, 700
 
-    # Create a new image with the combined height
-    combined_image = Image.new("RGB", (width, height * 2))
+    # Create a new image with the combined width
+    combined_image = Image.new("RGB", (width * 2, height * 2), '#ffffff')
 
-    # Create a new image with the same dimensions as the top image
-    combined_image = Image.new("RGB", (width, height * 2))
-
-    # Paste the top image on top and the bottom image on the bottom
+    # Paste the top image in the top-left corner
     combined_image.paste(image_top, (0, 0))
+
+    # Paste the bottom image in the bottom-left corner
     combined_image.paste(image_bottom, (0, height))
 
-    # generate the date aka the file name
-    current_date = datetime.date.today().strftime(
-        "%d--%m--%Y"
-    )  # Format the date as needed
+    # Paste the top image in the top-right corner
+    combined_image.paste(image_top, (width, 0))
 
-    # Save the combined image
-    combined_image.save(f"{current_date}.png")
+    # Paste the bottom image in the bottom-right corner
+    combined_image.paste(image_bottom, (width, height))
 
+    # Save the combined image with the desired layout
+    user = os.path.expanduser('~')
+    combined_image.save(f"{user}\\Documents\\Airway Bills\\{current_date}.png")
 
 def print_formatted_image():
     """
@@ -783,9 +801,10 @@ def print_formatted_image():
             generate_airway_bill_with_terms_and_conditions()
             current_date = datetime.date.today().strftime(
                 "%d--%m--%Y"
-            )  # Format the date as needed
+            )
+            # Format the date as needed
             print_image(f"{current_date}.png")
-            os.remove(f"{current_date}.png")
+            
         except Exception as e:
             CustomMessagebox.showerror("Printing Error", str(e))
 
@@ -860,44 +879,6 @@ personal_info_label = ctk.CTkLabel(
     sidebar, text="Personal Information", font=("Arial", 15)
 )
 personal_info_label.pack(pady=2)
-
-# Load the saved image path
-saved_image_path = None
-try:
-    with open(file="selected_image_path.txt", mode="r") as file:
-        saved_image_path = file.readline().strip()
-except FileNotFoundError:
-    pass
-
-# Set the default profile icon or load the saved image
-if saved_image_path:
-    rectangular_image = Image.open(saved_image_path)
-    resized_image = rectangular_image.resize((120, 120), Image.LANCZOS)
-
-    mask = Image.new("L", (120, 120), 0)
-    draw = ImageDraw.Draw(mask)
-    draw.ellipse((0, 0, 120, 120), fill=255)
-
-    circular_image = Image.new("RGBA", (120, 120))
-    circular_image.paste(resized_image, (0, 0), mask)
-
-else:
-    circular_image = Image.open("default_profile.png")
-
-circular_image_tk = ctk.CTkImage(circular_image, size=(120, 120))
-
-
-# Create the profile button
-profile_b = ctk.CTkButton(
-    sidebar,
-    image=circular_image_tk,
-    command=change_profile_pic,
-    text="",
-    height=120,
-    width=120,
-)
-profile_b.image = circular_image_tk
-profile_b.place()
 
 # Shipper name (1)
 entry_ship_name = ctk.CTkEntry(

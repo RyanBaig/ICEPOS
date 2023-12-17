@@ -1,0 +1,8 @@
+Pillow
+pyautogui
+screeninfo
+ttkbootstrap
+requests
+CTkMessageBox
+customtkinter
+packaging

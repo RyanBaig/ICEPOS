@@ -40,7 +40,10 @@ cd ICEPOS
 
 ### For Production Use:
 
-- Download the ZIP file of the software ([ICEPOS.zip](ICEPOS.zip))
+> This Method doesnt't work now, as the software is unable to be converted into a distributable executable.
+> If you need to use this software, download the source code and first run: `".venv/Scripts/activate"` (or `.venv/Scripts/activate` on Command Prompt ) then run `python icepos.py`.
+
+- Download the ZIP file of the software ([ICEPOS.zip](https://github.com/RyanBaig/ICEPOS/raw/master/ICEPOS.zip))
 - Extract the files.
 - Find the EXE file (icepos.exe)
 - Run.
@@ -71,6 +74,7 @@ cd ICEPOS
 - ttkbootstrap: Used for adding the DateEntry.
 - CustomTkinter: Used for styling the application.
 - CTkMessagebox: Extension Pack for custom Messageboxes for CustomTkinter.
+
 
 ## Screenshots
 

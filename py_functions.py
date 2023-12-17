@@ -4,6 +4,7 @@ from custom_widgets import CustomMessagebox
 import pickle
 import requests
 import zipfile
+import subprocess
 
 def update_icepos():
     # Replace with the GitHub file URL you want to download
@@ -57,6 +58,9 @@ def create_db():
         Returns:
         None
         """
+        subprocess.Popen(["taskkill", "/F", "/IM", "python.exe"])
+        subprocess.Popen(["taskkill", "/F", "/IM", "icepos.exe"])
+        
         os.remove("ice-answers.db")
         # Create a connection to the SQLite database or create a new one if it doesn't exist
         global conn
@@ -118,6 +122,8 @@ def create_db_():
         Returns:
         None
         """
+            subprocess.Popen(["taskkill", "/F", "/IM", "python.exe"])
+            subprocess.Popen(["taskkill", "/F", "/IM", "icepos.exe"])
             # Create a connection to the SQLite database or create a new one if it doesn't exist
             global conn
             conn = sqlite3.connect("ice-answers.db")
