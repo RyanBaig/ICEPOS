@@ -695,7 +695,12 @@ def generate_airway_bill_with_terms_and_conditions():
 
     # Save the combined image with the desired layout
     user = os.path.expanduser('~')
-    combined_image.save(f"{user}\\Documents\\Airway Bills\\{current_date}.png")
+    final_path = f"{user}\\Desktop\\Airway Bills\\"
+    if not os.path.exists(final_path):
+        os.makedirs(final_path)
+    print(final_path + f"{current_date}.png")
+    combined_image.save(final_path + f"{current_date}.png")
+    print("saved final " + final_path)
 
 def print_formatted_image():
     """
@@ -768,7 +773,9 @@ def print_formatted_image():
                 "%d--%m--%Y"
             )
             # Format the date as needed
-            print_image(f"{current_date}.png")
+            user = os.path.expanduser('~')
+            final_path = f"{user}\\Desktop\\Airway Bills\\"
+            print_image(final_path + f"{current_date}.png")
             
         except Exception as e:
             CustomMessagebox.showerror("Printing Error", str(e))
