@@ -578,24 +578,41 @@ def create_formatted_image(
     font = ImageFont.truetype("arial.ttf", 20)
     print("font")
     # Define the coordinates for placing text on the image
-    coordinates = {
-        "ship_name": (45, 210),
-        "ship_address": (45, 305),
-        "ship_desc": (45, 395),
-        "ship_dest": (700, 270),
-        "ship_serv": (1100, 270),
-        "rec_name": (700, 375),
-        "rec_address": (700, 470),
-        "rec_zipcode": (1052, 580),
-        "ship_weight": (45, 595),
-        "ship_charges": (470, 595),
-        "no_of_pieces": (252, 595),
-        "date": (697, 180),
-        "ship_contact": (45, 490),
-        "rec_contact": (725, 573),
-        "serial_no": (1100, 180),
-    }
+    # coordinates = {
+    #     "ship_name": (45, 190),
+    #     "ship_address": (45, 270),
+    #     "ship_desc": (45, 395),
+    #     "ship_dest": (700, 270),
+    #     "ship_serv": (1100, 270),
+    #     "rec_name": (700, 375),
+    #     "rec_address": (700, 470),
+    #     "rec_zipcode": (1052, 580),
+    #     "ship_weight": (45, 595),
+    #     "ship_charges": (470, 595),
+    #     "no_of_pieces": (252, 595),
+    #     "date": (697, 180),
+    #     "ship_contact": (45, 490),
+    #     "rec_contact": (725, 573),
+    #     "serial_no": (1100, 180),
+    # }
 
+    coordinates = {
+    "ship_name": (45, 190),
+    "ship_address": (45, 270),
+    "ship_desc": (45, 355),
+    "ship_contact": (45, 440),
+    "date": (620, 190),
+    "ship_dest": (620, 270),
+    "ship_serv": (990, 270),
+    "rec_name": (620, 350),
+    "rec_address": (620, 440),
+    "rec_zipcode": (940, 530),
+    "ship_weight": (45, 530),
+    "ship_charges": (430, 530),
+    "no_of_pieces": (230, 530),
+    "rec_contact": (650, 530),
+    "serial_no": (970, 190)
+}
     # Draw the text on the image
     draw.text(coordinates["ship_name"], f"{ship_name}", fill=(0, 0, 0), font=font)
     draw.text(coordinates["ship_address"], f"{ship_address}", fill=(0, 0, 0), font=font)
@@ -695,7 +712,7 @@ def generate_airway_bill_with_terms_and_conditions():
 
     # Save the combined image with the desired layout
     user = os.path.expanduser('~')
-    final_path = f"{user}\\Desktop\\Airway Bills\\"
+    final_path = f"{user}\\Desktop\\Airway-Bills\\"
     if not os.path.exists(final_path):
         os.makedirs(final_path)
     print(final_path + f"{current_date}.png")
@@ -774,7 +791,10 @@ def print_formatted_image():
             )
             # Format the date as needed
             user = os.path.expanduser('~')
-            final_path = f"{user}\\Desktop\\Airway Bills\\"
+            final_path = f"{user}\\Desktop\\Airway-Bills\\"
+            if not os.path.exists(final_path):
+                os.makedirs(final_path)
+	    
             print_image(final_path + f"{current_date}.png")
             
         except Exception as e:
@@ -852,11 +872,15 @@ personal_info_label = ctk.CTkLabel(
 )
 personal_info_label.pack(pady=2)
 
+
+
+# ------ INPUTS ---------
+
 # Shipper name (1)
 entry_ship_name = ctk.CTkEntry(
-    tab_control.tab("Submission"), width=550, font=("Arial", 14)
+    tab_control.tab("Submission"), width=540, font=("Arial", 14)
 )
-entry_ship_name.place(x=45, y=210)
+entry_ship_name.place(x=45, y=190)
 
 # Shipper Address (2)
 entry_ship_address = ctk.StringVar()
@@ -866,41 +890,42 @@ entry_ship_address_entry = ctk.CTkEntry(
     font=("Arial", 14),
     textvariable=entry_ship_address,
 )
-entry_ship_address_entry.place(x=45, y=305)
+
+entry_ship_address_entry.place(x=45, y=270)
 
 # Shipment Description (3)
 entry_ship_desc = ctk.CTkEntry(
     tab_control.tab("Submission"), width=550, font=("Arial", 14)
 )
-entry_ship_desc.place(x=45, y=395)
+entry_ship_desc.place(x=45, y=355)
 
 # Shipment Contact # (4)
 entry_ship_contact = ctk.CTkEntry(
     tab_control.tab("Submission"), width=240, font=("Arial", 14)
 )
-entry_ship_contact.place(x=45, y=490)
+entry_ship_contact.place(x=45, y=440)
 
 # Shipment Date (5)
 entry_date = DateEntry(tab_control.tab("Submission"), bootstyle="primary", width=37)
-entry_date.place(x=697, y=190)
+entry_date.place(x=620, y=190)
 
 # Shipment Destination (6)
 entry_ship_dest = ctk.CTkEntry(
     tab_control.tab("Submission"), width=280, font=("Arial", 14)
 )
-entry_ship_dest.place(x=700, y=270)
+entry_ship_dest.place(x=620, y=270)
 
 # Shipment Service (7)
 entry_ship_serv = ctk.CTkEntry(
     tab_control.tab("Submission"), width=180, font=("Arial", 14)
 )
-entry_ship_serv.place(x=1100, y=270)
+entry_ship_serv.place(x=970, y=270)
 
 # Receiver Name (8)
 entry_rec_name = ctk.CTkEntry(
     tab_control.tab("Submission"), width=550, font=("Arial", 14)
 )
-entry_rec_name.place(x=700, y=375)
+entry_rec_name.place(x=620, y=350)
 
 # Receiver Address (9)
 entry_rec_address = ctk.StringVar()
@@ -910,37 +935,37 @@ entry_rec_address_entry = ctk.CTkEntry(
     font=("Arial", 14),
     textvariable=entry_rec_address,
 )
-entry_rec_address_entry.place(x=700, y=470)
+entry_rec_address_entry.place(x=620, y=440)
 
 # Receiver Zipcode (10)
 entry_rec_zipcode = ctk.CTkEntry(
     tab_control.tab("Submission"), width=200, font=("Arial", 14)
 )
-entry_rec_zipcode.place(x=1052, y=580)
+entry_rec_zipcode.place(x=940, y=530)
 
 # Shipment Weight (11)
 entry_ship_weight = ctk.CTkEntry(
     tab_control.tab("Submission"), width=140, font=("Arial", 14)
 )
-entry_ship_weight.place(x=45, y=595)
+entry_ship_weight.place(x=45, y=530)
 
 # Shipment Charges (12)
 entry_ship_charges = ctk.CTkEntry(
     tab_control.tab("Submission"), width=150, font=("Arial", 14)
 )
-entry_ship_charges.place(x=470, y=595)
+entry_ship_charges.place(x=430, y=530)
 
 # No. of Pieces (13)
 entry_no_of_pieces = ctk.CTkEntry(
     tab_control.tab("Submission"), width=130, font=("Arial", 14)
 )
-entry_no_of_pieces.place(x=260, y=595)
+entry_no_of_pieces.place(x=230, y=530)
 
 # Consignee Contact (14)
 entry_rec_contact = ctk.CTkEntry(
     tab_control.tab("Submission"), width=200, font=("Arial", 14)
 )
-entry_rec_contact.place(x=725, y=577)
+entry_rec_contact.place(x=650, y=530)
 
 # Create a connection to the SQLite database
 conn = sqlite3.connect("ice-answers.db")
