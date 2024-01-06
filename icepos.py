@@ -843,6 +843,7 @@ try:
     print("Background image loaded successfully.")
     # Create an image item on the canvas with the background image
     submission_canvas.create_image(0, 0, anchor=tk.NW, image=background_image)
+    # submission_canvas.scale(background_image, 0, 0, 1.5, 1.5)
     print("Background image loaded on canvas successfully.")
 except tk.TclError as e:
     print("Error loading background image:", str(e))
