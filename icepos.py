@@ -8,328 +8,22 @@ import tkinter as tk
 import customtkinter as ctk
 import pyautogui
 import screeninfo
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
 from ttkbootstrap.widgets import DateEntry
 
 from custom_widgets import CustomMessagebox
-from functions import DB, Consignment, Menu, Window
+from functions import DB, Answer, Consignment, Menu, Window
 
-current_date = datetime.date.today().strftime("%d-%m-%Y -- %H-%M-%S")
-if not os.path.exists(os.path.abspath("assets\\misc\\assets\\misc\\ice-answers.db")):
+# Get Current Date & Time
+current_date = datetime.datetime.now().strftime("%d-%m-%Y -- %H-%M-%S")
+
+# Create DB
+if not os.path.exists(os.path.abspath(os.path.join("assets", "misc", "ice-answers.db"))):
     DB.create_db()
+
 # Functions:
 
-# Function to display the selected answer in the Text widget
-def display_selected_answer():
-    """
-    Display the selected answer in the answers_text widget.
-
-    This function updates the dropdown and text with the latest data and then
-    fetches the selected answer data from the dropdown.rows dictionary. If the
-    selected answer data is not found, the function returns without making any
-    changes. Otherwise, it formats and displays all fields of the selected
-    answer in the answers_text widget.
-
-    Parameters:
-    None
-
-    Returns:
-    None
-    """
-    try:
-        # Update the dropdown and text with latest data
-        refresh_dropdown_and_text()
-
-        selected_value = selected_answer.get()
-
-        # Fetch the selected answer data from the dropdown.rows dictionary
-        ans_dict = answer_dropdown.rows.get(selected_value)
-
-        # If the selected answer data is not found, return without making any changes
-        if ans_dict is None:
-            return
-
-        answers_text.configure(state="normal")
-        answers_text.delete(1.0, ctk.END)
-
-        # Format and display all fields of the selected answer
-        for column, value in ans_dict.items():
-            answers_text.insert(ctk.END, f"{column}: {value}\n")
-
-        answers_text.configure(state="disabled")
-        refresh_dropdown_and_text()
-    except KeyError as e:
-        print("Error: Shipper-Receiver combination not found in the dictionary.")
-        print("Detailed Error:", str(e))
-        pass
-
-
-# Function to update the dropdown and text widget when the Refresh button is clicked
-def refresh_dropdown_and_text():
-    """
-    Refreshes the dropdown menu and text fields with data from the database.
-    If there are no records in the database, no changes are made.
-
-    Parameters:
-        None
-
-    Returns:
-        None
-    """
-    try:
-        # Fetch data from the database
-        cursor.execute("SELECT * FROM answers")
-        rows = cursor.fetchall()
-
-        # If there are no records in the database, return without making any changes
-        if not rows:
-            return
-
-        # Update the dropdown with valid shipper-receiver names
-        valid_shipper_receiver_names = []
-        ans_dict = {}
-
-        for row in rows:
-            shipper_name = row[0]
-            receiver_name = row[6]
-            if shipper_name and receiver_name:
-                shipper_receiver_name = f"{shipper_name} - {receiver_name}"
-                valid_shipper_receiver_names.append(shipper_receiver_name)
-                ans_dict[shipper_receiver_name] = {
-                    "Date": row[13],
-                    "Consignment Key": row[14],
-                    "-----": "-----",
-                    "Shipper Name": shipper_name,
-                    "Shipper Address": row[1],
-                    "Shipper Contact Number": row[2],
-                    "------": "-----",
-                    "Receiver Name": receiver_name,
-                    "Receiver Address": row[7],
-                    "Receiver Contact Number": row[8],
-                    "Receiver Zipcode": row[9],
-                    "-------": "-----",
-                    "Shipment Description": row[3],
-                    "Shipment Destination": row[4],
-                    "Shipment Service": row[5],
-                    "Number of Pieces": row[12],
-                    "Shipment Weight": row[10],
-                    "Shipment Charges": row[11],
-                }
-
-        answer_dropdown["values"] = valid_shipper_receiver_names
-        answer_dropdown.rows = ans_dict
-
-    except Exception as error:
-        print(f"Error in refresh_dropdown_and_text: {str(error)}")
-        pass
-
-
-def submit():
-        """
-        Submit the form data to the database, send notifications, and display success message.
-
-        Returns:
-            None
-
-        Raises:
-            None
-        """
-        
-        # Fetch data from the input fields
-        ship_name = entry_ship_name.get()
-        ship_address1 = entry_ship_address1.get()
-        ship_address2 = entry_ship_address2.get()
-        ship_desc = entry_ship_desc.get()
-        ship_dest = entry_ship_dest.get()
-        ship_serv = entry_ship_serv.get()
-        rec_name = entry_rec_name.get()
-        rec_address1 = entry_rec_address1.get()
-        rec_address2 = entry_rec_address2.get()
-        rec_zipcode = entry_rec_zipcode.get()
-        ship_weight = entry_ship_weight.get()
-        ship_charges = entry_ship_charges.get()
-        no_of_pieces = entry_no_of_pieces.get()
-        date = entry_date.entry.get()
-        ship_contact = entry_ship_contact.get()
-        rec_contact = entry_rec_contact.get()
-
-        # Check if any field is empty
-        if any(
-            value == ""
-            for value in [
-                ship_name,
-                ship_address1,
-                ship_address2,
-                ship_desc,
-                ship_dest,
-                ship_serv,
-                rec_name,
-                rec_address1,
-                rec_address2,
-                rec_zipcode,
-                ship_weight,
-                ship_charges,
-                no_of_pieces,
-                date,
-                ship_contact,
-                rec_contact,
-            ]
-        ):
-            CustomMessagebox.showerror("Error", "All fields are required!")
-        else:
-            # Insert the data into the database
-            cursor.execute(
-                f"""
-                INSERT INTO answers (
-                    shipper_name,
-                    shipper_address1,
-                    shipper_address2,
-                    shipper_contact,
-                    shipment_description,
-                    shipment_destination,
-                    shipment_service,
-                    receiver_name,
-                    receiver_address1,
-                    receiver_address2,
-                    rec_contact,
-                    receiver_zipcode,
-                    weight,
-                    charges,
-                    no_of_pieces,
-                    date,
-                    consign_identifier
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-""",
-                (
-                    ship_name,
-                    ship_address1,
-                    ship_address2,
-                    ship_contact,
-                    ship_desc,
-                    ship_dest,
-                    ship_serv,
-                    rec_name,
-                    rec_address1,
-                    rec_address2,
-                    rec_contact,
-                    rec_zipcode,
-                    ship_weight,
-                    ship_charges,
-                    no_of_pieces,
-                    date,
-                    Consignment.generate_consign_key(),
-                ),
-            )
-
-            conn.commit()  # Commit the changes to the database
-            # Refresh the dropdown and display the updated data in the Text widget
-            refresh_dropdown_and_text()
-            CustomMessagebox.showsuccess("Information Submitted", "The Information has been Added to ICEPOS records.")
-    
-            
-
-
 # Function to create a formatted image
-def create_formatted_image(
-    ship_name,
-    ship_address1,
-    ship_address2,
-    ship_desc,
-    ship_dest,
-    ship_serv,
-    rec_name,
-    rec_address1,
-    rec_address2,
-    rec_zipcode,
-    ship_weight,
-    ship_charges,
-    no_of_pieces,
-    date,
-    ship_contact,
-    rec_contact,
-    serial_no,
-):
-    """
-    Create a formatted image using the given information and save it as a PNG file.
-
-    Args:
-        ship_name (str): The name of the ship.
-        ship_address (str): The address of the ship.
-        ship_desc (str): The description of the ship.
-        ship_dest (str): The destination of the ship.
-        ship_serv (str): The service of the ship.
-        rec_name (str): The name of the recipient.
-        rec_address (str): The address of the recipient.
-        rec_zipcode (str): The zipcode of the recipient.
-        ship_weight (str): The weight of the shipment.
-        ship_charges (str): The charges for the shipment.
-        no_of_pieces (str): The number of pieces in the shipment.
-        date (str): The date of the shipment.
-        ship_contact (str): The contact information of the ship.
-        rec_contact (str): The contact information of the recipient.
-        serial_no (str): The serial number of the shipment.
-
-    Returns:
-        None
-    """
-    # Load the background image
-    background_img = Image.open("assets\\images\\airway_bill_for_printing.png")
-    print("Inside create_formatted_image function...")
-
-    # Create a drawing context
-    draw = ImageDraw.Draw(background_img)
-    print("drawn")
-    # Set the font
-    font = ImageFont.truetype("arial.ttf", 20)
-    print("font")
-    # Define the coordinates for placing text on the image
-
-    coordinates = {
-    "ship_name": (45, 135),
-    "ship_address1": (45, 220),
-    "ship_address2": (45, 280),
-    "ship_desc": (45, 355),
-    "ship_contact": (45, 440),
-    "date": (620, 140),
-    "ship_dest": (620, 230),
-    "ship_serv": (970, 230),
-    "rec_name": (620, 300),
-    "rec_address1": (620, 380),
-    "rec_address2": (620, 440),
-    "rec_zipcode": (940, 530),
-    "ship_weight": (45, 530),
-    "ship_charges": (430, 530),
-    "no_of_pieces": (230, 530),
-    "rec_contact": (650, 530),
-    "serial_no": (970, 140)
-}
-    # Draw the text on the image
-    draw.text(coordinates["ship_name"], f"{ship_name}", fill=(0, 0, 0), font=font)
-    draw.text(coordinates["ship_address1"], f"{ship_address1}", fill=(0, 0, 0), font=font)
-    draw.text(coordinates["ship_address2"], f"{ship_address2}", fill=(0, 0, 0), font=font)
-    draw.text(coordinates["ship_desc"], f"{ship_desc}", fill=(0, 0, 0), font=font)
-    draw.text(coordinates["ship_dest"], f"{ship_dest}", fill=(0, 0, 0), font=font)
-    draw.text(coordinates["ship_serv"], f"{ship_serv}", fill=(0, 0, 0), font=font)
-    draw.text(coordinates["rec_name"], f"{rec_name}", fill=(0, 0, 0), font=font)
-    draw.text(coordinates["rec_address1"], f"{rec_address1}", fill=(0, 0, 0), font=font)
-    draw.text(coordinates["rec_address2"], f"{rec_address2}", fill=(0, 0, 0), font=font)
-    draw.text(coordinates["rec_zipcode"], f"{rec_zipcode}", fill=(0, 0, 0), font=font)
-    draw.text(coordinates["ship_weight"], f"{ship_weight}", fill=(0, 0, 0), font=font)
-    draw.text(coordinates["ship_charges"], f"{ship_charges}", fill=(0, 0, 0), font=font)
-    draw.text(coordinates["no_of_pieces"], f"{no_of_pieces}", fill=(0, 0, 0), font=font)
-    draw.text(coordinates["date"], f"{date}", fill=(0, 0, 0), font=font)
-    draw.text(coordinates["ship_contact"], f"{ship_contact}", fill=(0, 0, 0), font=font)
-    draw.text(coordinates["rec_contact"], f"{rec_contact}", fill=(0, 0, 0), font=font)
-    draw.text(
-        coordinates["serial_no"], serial_no, fill=(0, 0, 0), font=font
-    )
-    print("text drawn")
-    # Save the formatted image
-    
-    background_img.save(f"{current_date}.png")
-
-    # Show a message box indicating the image creation
-    CustomMessagebox.showinfo("Image Created", "Formatted image created successfully.")
 
 
 # Print function
@@ -381,7 +75,7 @@ def generate_airway_bill_with_terms_and_conditions():
     # Open the two images you want to combine
     image_top = Image.open(f"{current_date}.png")
     image_top.thumbnail((1350, 700))
-    image_bottom = Image.open("assets\\images\\terms_and_conditions.png")
+    image_bottom = Image.open(os.path.join("assets", "images", "terms_and_conditions.png"))
     image_bottom.thumbnail((1350, 700))
 
     # Get the dimensions of the images
@@ -404,11 +98,14 @@ def generate_airway_bill_with_terms_and_conditions():
 
     # Save the combined image with the desired layout
     user = os.path.expanduser('~')
-    final_path = f"{user}\\Desktop\\Airway-Bills\\"
+    final_path = os.path.join(user, "Desktop", "Airway-Bills")
     if not os.path.exists(final_path):
         os.makedirs(final_path)
+
     print(final_path + f"{current_date}.png")
-    combined_image.save(final_path + f"{current_date}.png")
+
+    combined_image.save(os.path.join(final_path, f"{current_date}.png"))
+
     print("saved final " + final_path)
 
 def print_formatted_image():
@@ -484,16 +181,16 @@ def print_formatted_image():
         # Print the formatted image
         try:
             generate_airway_bill_with_terms_and_conditions()
-            current_date = datetime.date.today().strftime(
-                "%d--%m--%Y"
+            current_date = datetime.datetime.now().strftime(
+                "%d-%m-%Y -- %H-%M-%S"
             )
             # Format the date as needed
             user = os.path.expanduser('~')
-            final_path = f"{user}\\Desktop\\Airway-Bills\\"
+            final_path = os.path.join(user, "Desktop", "Airway-Bills")
             if not os.path.exists(final_path):
                 os.makedirs(final_path)
 	    
-            print_image(final_path + f"{current_date}.png")
+            print_image(os.path.join(final_path, f"{current_date}.png"))
             
         except Exception as e:
             CustomMessagebox.showerror("Printing Error", str(e))
@@ -515,7 +212,7 @@ window = ctk.CTk()
 window.title("ICE AIRWAY BILL")
 window.geometry(f"{width}x{height}"
 )
-window.iconbitmap("assets\\images\\icon.ico")
+window.iconbitmap(os.path.join("assets", "images", "icon.ico"))
 
 
 # Create a Tab Control
@@ -534,7 +231,7 @@ submission_canvas.pack()
 
 # Load the background image for the Submission tab
 print("Loading background image...")
-background_image_path = "assets\\images\\background.png"
+background_image_path = os.path.join("assets", "images", "background.png")
 print("Background image path:", background_image_path)
 try:
     background_image = tk.PhotoImage(file=background_image_path)
@@ -553,7 +250,7 @@ sidebar.place(x=-300, y=0, relheight=1, anchor=tk.NW)
 
 
 # Create the hamburger button using the PNG icon
-menu_icon = ctk.CTkImage(Image.open("assets\\images\\menu.png"))
+menu_icon = ctk.CTkImage(Image.open(os.path.join("assets", "images", "menu.png")))
 hamburger = ctk.CTkButton(
     submission_canvas,
     image=menu_icon,
@@ -700,7 +397,7 @@ entry_rec_contact = ctk.CTkEntry(
 entry_rec_contact.place(x=650, y=530)
 
 # Create a connection to the SQLite database
-conn = sqlite3.connect("assets\\misc\\ice-answers.db")
+conn = sqlite3.connect(os.path.join("assets", "misc", "ice-answers.db"))
 
 # Create a cursor object from the connection
 cursor = conn.cursor()
@@ -723,7 +420,29 @@ submit_button = ctk.CTkButton(
     tab_control.tab("Submission"),
     text="Submit",
     width=10,
-    command=lambda: [submit(), refresh_dropdown_and_text()],
+    command=lambda: [
+        Answer.submit(
+            [
+                entry_ship_name.get(),
+                 entry_ship_address1.get(),
+                  entry_ship_address2.get(),
+                   entry_ship_desc.get(),
+                    entry_ship_dest.get(),
+                     entry_ship_serv.get(),
+                      entry_rec_name.get(),
+                       entry_rec_address1.get(),
+                        entry_rec_address2.get(),
+                         entry_rec_zipcode.get(),
+                          entry_ship_weight.get(),
+                           entry_ship_charges.get(),
+                            entry_no_of_pieces.get(),
+                             entry_date.entry.get(),
+                              entry_ship_contact.get(),
+                               entry_rec_contact.get()],
+                                answer_dropdown
+                                ),
+                                Answer.refresh_dropdown_and_text(answer_dropdown)
+                                ],
 )
 submit_button.place(x=600, y=600)
 
@@ -732,7 +451,7 @@ print_button = ctk.CTkButton(
     tab_control.tab("Submission"),
     text="Print",
     width=10,
-    command=lambda: [print_formatted_image(), refresh_dropdown_and_text()],
+    command=lambda: [print_formatted_image(), Answer.refresh_dropdown_and_text(answer_dropdown)],
 )
 print_button.place(x=710, y=600)
 
@@ -928,13 +647,13 @@ refresh_dropdown()
 
 # Create a button to display the selected answer
 display_button = ctk.CTkButton(
-    tab_control.tab("Answers"), text="Display Answer", command=display_selected_answer
-)
+    tab_control.tab("Answers"), text="Display Answer")
+display_button.configure(command=lambda: Window.display_selected_answer(selected_answer, answer_dropdown, answers_text))
 display_button.pack(padx=10, pady=1)
 
 # Create a button to refresh
 refresh_button = ctk.CTkButton(
-    tab_control.tab("Answers"), text="Refresh", command=refresh_dropdown_and_text
+    tab_control.tab("Answers"), text="Refresh", command=Answer.refresh_dropdown_and_text
 )
 refresh_button.pack()
 
