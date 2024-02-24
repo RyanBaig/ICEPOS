@@ -2,11 +2,9 @@ import datetime
 import os
 import sqlite3
 import threading
-import time
 import tkinter as tk
 
 import customtkinter as ctk
-import pyautogui
 import screeninfo
 from PIL import Image
 from ttkbootstrap.widgets import DateEntry
@@ -26,34 +24,7 @@ if not os.path.exists(os.path.abspath(os.path.join("assets", "misc", "ice-answer
 # Function to create a formatted image
 
 
-# Print function
-def print_image(image_path):
-    """
-    Print the image located at the given image_path.
 
-    Parameters:
-        image_path (str): The path to the image file.
-
-    Returns:
-        None
-    """
-    try:
-        path = os.path.abspath(image_path)
-        print(path)
-        cmd = f'start {path}'
-        print(cmd)
-        # Open the combined image using the default photo viewer
-        os.system(cmd)
-
-        # Wait for the File Explorer window to open
-        time.sleep(2)
-
-        # Simulate keypress to trigger print dialog (Ctrl+P)
-        pyautogui.hotkey('ctrl', 'p')
-
-        CustomMessagebox.showinfo("Printing", "Formatted image sent to printer.")
-    except Exception as e:
-        CustomMessagebox.showerror("Printing Error", str(e))
 
 
 def generate_airway_bill_with_terms_and_conditions():
@@ -107,6 +78,7 @@ def generate_airway_bill_with_terms_and_conditions():
     combined_image.save(os.path.join(final_path, f"{current_date}.png"))
 
     print("saved final " + final_path)
+    os.remove(f"{current_date}.png")
 
 def print_formatted_image():
     """
@@ -158,7 +130,7 @@ def print_formatted_image():
     if any(value == "" for value in values):
         CustomMessagebox.showerror("Error", "All fields are required!")
     else:
-        create_formatted_image(
+        Answer.create_formatted_image(
             ship_name,
             ship_address1,
             ship_address2,
@@ -181,16 +153,14 @@ def print_formatted_image():
         # Print the formatted image
         try:
             generate_airway_bill_with_terms_and_conditions()
-            current_date = datetime.datetime.now().strftime(
-                "%d-%m-%Y -- %H-%M-%S"
-            )
+            
             # Format the date as needed
             user = os.path.expanduser('~')
             final_path = os.path.join(user, "Desktop", "Airway-Bills")
             if not os.path.exists(final_path):
                 os.makedirs(final_path)
 	    
-            print_image(os.path.join(final_path, f"{current_date}.png"))
+            Answer.print_image(os.path.join(final_path, f"{current_date}.png"))
             
         except Exception as e:
             CustomMessagebox.showerror("Printing Error", str(e))
@@ -421,8 +391,7 @@ submit_button = ctk.CTkButton(
     text="Submit",
     width=10,
     command=lambda: [
-        Answer.submit(
-            [
+        Answer.submit(entries=[
                 entry_ship_name.get(),
                  entry_ship_address1.get(),
                   entry_ship_address2.get(),
@@ -439,7 +408,7 @@ submit_button = ctk.CTkButton(
                              entry_date.entry.get(),
                               entry_ship_contact.get(),
                                entry_rec_contact.get()],
-                                answer_dropdown
+                               answer_dropdown=answer_dropdown
                                 ),
                                 Answer.refresh_dropdown_and_text(answer_dropdown)
                                 ],
@@ -648,13 +617,13 @@ refresh_dropdown()
 # Create a button to display the selected answer
 display_button = ctk.CTkButton(
     tab_control.tab("Answers"), text="Display Answer")
-display_button.configure(command=lambda: Window.display_selected_answer(selected_answer, answer_dropdown, answers_text))
+display_button.configure(command=lambda: Answer.display_selected_answer(selected_answer, answer_dropdown, answers_text))
 display_button.pack(padx=10, pady=1)
 
 # Create a button to refresh
 refresh_button = ctk.CTkButton(
-    tab_control.tab("Answers"), text="Refresh", command=Answer.refresh_dropdown_and_text
-)
+    tab_control.tab("Answers"), text="Refresh")
+refresh_button.configure(command=Answer.refresh_dropdown_and_text(answer_dropdown))
 refresh_button.pack()
 
 # Bind the F11 key to toggle fullscreen

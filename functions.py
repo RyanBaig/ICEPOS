@@ -6,9 +6,9 @@ import time
 import tkinter as tk
 from math import cos, pi
 
-
 import customtkinter as ctk
-from PIL import ImageDraw, ImageFont, Image
+import pyautogui
+from PIL import Image, ImageDraw, ImageFont
 
 from custom_widgets import CustomMessagebox
 
@@ -145,7 +145,7 @@ class DB:
         None
         """
 
-        # Justdelete the DB.
+        # Just delete the DB.
         os.remove(os.path.abspath("./assets\\misc\\ice-answers.db"))
         print("SQLite Database and Table Deleted Successfully")
 
@@ -357,7 +357,7 @@ class Answer:
         """
         try:
             # Update the dropdown and text with latest data
-            Window.refresh_dropdown_and_text()
+            Answer.refresh_dropdown_and_text(answer_dropdown)
 
             selected_value = selected_answer.get()
 
@@ -376,7 +376,7 @@ class Answer:
                 answers_text.insert(ctk.END, f"{column}: {value}\n")
 
             answers_text.configure(state="disabled")
-            Window.refresh_dropdown_and_text()
+            Answer.refresh_dropdown_and_text(answer_dropdown)
         except KeyError as e:
             print("Error: Shipper-Receiver combination not found in the dictionary.")
             print("Detailed Error:", str(e))
@@ -396,6 +396,12 @@ class Answer:
         """
         try:
             # Fetch data from the database
+            # Create a connection to the SQLite database or create a new one if it doesn't exist
+            global conn
+            conn = sqlite3.connect("assets\\misc\\ice-answers.db")
+            # Create a cursor object from the connection to execute SQL commands
+            global cursor
+            cursor = conn.cursor() 
             cursor.execute("SELECT * FROM answers")
             rows = cursor.fetchall()
 
@@ -441,7 +447,7 @@ class Answer:
             print(f"Error in refresh_dropdown_and_text: {str(error)}")
             pass
 
-    def submit(entries, answer_dropdown):
+    def submit(entries: list, answer_dropdown):
         """
         Submit the form data to the database, send notifications, and display success message.
 
@@ -451,11 +457,18 @@ class Answer:
         Raises:
             None
         """
-
+        print(f"ENTRIES: {entries}")
         # Check if any field is empty
         if any(value == "" for value in entries):
             CustomMessagebox.showerror("Error", "All fields are required!")
         else:
+            # Create a connection to the SQLite database or create a new one if it doesn't exist
+            global conn
+            conn = sqlite3.connect("assets\\misc\\ice-answers.db")
+            # Create a cursor object from the connection to execute SQL commands
+            global cursor
+            cursor = conn.cursor() 
+
             # Insert the data into the database
             cursor.execute(
                 """
@@ -479,7 +492,7 @@ class Answer:
                     consign_identifier
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
-                (entries, Consignment.generate_consign_key())
+                (*entries, Consignment.generate_consign_key())
             )
 
             conn.commit()  # Commit the changes to the database
@@ -528,7 +541,7 @@ class Answer:
         "ship_contact": (45, 440),
         "date": (620, 140),
         "ship_dest": (620, 230),
-        "ship_serv": (970, 230),
+        "ship_serv": (975, 230),
         "rec_name": (620, 300),
         "rec_address1": (620, 380),
         "rec_address2": (620, 440),
@@ -537,7 +550,7 @@ class Answer:
         "ship_charges": (430, 530),
         "no_of_pieces": (230, 530),
         "rec_contact": (650, 530),
-        "serial_no": (970, 140)
+        "serial_no": (975, 140)
     }
         # Draw the text on the image
         draw.text(coordinates["ship_name"], f"{ship_name}", fill=(0, 0, 0), font=font)
@@ -567,4 +580,31 @@ class Answer:
         # Show a message box indicating the image creation
         CustomMessagebox.showinfo("Image Created", "Formatted image created successfully.")
 
-            
+    # Print function
+    def print_image(image_path):
+        """
+        Print the image located at the given image_path.
+
+        Parameters:
+            image_path (str): The path to the image file.
+
+        Returns:
+            None
+        """
+        try:
+            path = os.path.abspath(image_path)
+            print(path)
+            cmd = f'start "{path}"'
+            print(cmd)
+            # Open the combined image using the default photo viewer
+            os.system(cmd)
+
+            # Wait for the File Explorer window to open
+            time.sleep(2)
+
+            # Simulate keypress to trigger print dialog (Ctrl+P)
+            pyautogui.hotkey('ctrl', 'p')
+
+            CustomMessagebox.showinfo("Printing", "Formatted image sent to printer.")
+        except Exception as e:
+            CustomMessagebox.showerror("Printing Error", str(e))
