@@ -671,7 +671,8 @@ rows = cursor.fetchall()
 # Retrieve and display the initial data from the table in the Answers tab
 update_dropdown_with_data()
 
-close_button = ctk.CTkButton(sidebar, text="Close", command=Menu.close_menu, width=5)
+close_button = ctk.CTkButton(sidebar, text="Close", width=5)
+close_button.configure(command=lambda: Menu.close_menu(sidebar, window))
 close_button.pack()
 
 # Run the Tkinter event loop

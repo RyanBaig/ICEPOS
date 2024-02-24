@@ -145,16 +145,8 @@ class DB:
         None
         """
 
-        # Create a connection to the SQLite database or create a new one if itdoesn't exist
-        conn = sqlite3.connect("assets\\misc\\ice-answers.db")
-
-        # Create a cursor object from the connection to execute SQL commands
-        cursor = conn.cursor()
-
-        # Now the main part
-        cursor.execute('DROP TABLE answers')
-        conn.commit()
-        conn.close()
+        # Justdelete the DB.
+        os.remove(os.path.abspath("./assets\\misc\\ice-answers.db"))
         print("SQLite Database and Table Deleted Successfully")
 
 
@@ -307,7 +299,7 @@ class Menu:
         Menu.animate_sidebar(target_x, sidebar, window)
 
 
-    def close_menu():
+    def close_menu(sidebar, window):
         """
         Closes the menu by setting the animation direction to close and animating the sidebar to the target position.
 
@@ -320,7 +312,7 @@ class Menu:
         global animation_direction
         animation_direction = 0  # Set direction to close
         target_x = -300  # Target position for closing the sidebar
-        Menu.animate_sidebar(target_x)
+        Menu.animate_sidebar(target_x, sidebar, window)
 
 
     def animate_sidebar(target_x, sidebar, window):
