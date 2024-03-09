@@ -182,7 +182,7 @@ window = ctk.CTk()
 window.title("ICE AIRWAY BILL")
 window.geometry(f"{width}x{height}"
 )
-window.iconbitmap(os.path.join("assets", "images", "icon.ico"))
+
 
 
 # Create a Tab Control
@@ -601,7 +601,7 @@ def update_dropdown_with_data():
 try:
     # Populate the Combobox with the shipper names from the database
     cursor.execute("SELECT shipper_name, receiver_name FROM answers")
-except sqlite3.OperationalError as e:
+except sqlite3.OperationalError:
     DB.create_db()
 shipper_receiver_names = cursor.fetchall()
 answer_dropdown.configure(

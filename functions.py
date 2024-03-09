@@ -5,11 +5,11 @@ import sqlite3
 import time
 import tkinter as tk
 from math import cos, pi
-
+import httpx
 import customtkinter as ctk
 import pyautogui
 from PIL import Image, ImageDraw, ImageFont
-
+import asyncio
 from custom_widgets import CustomMessagebox
 
 # Get Current Date & Time
@@ -45,7 +45,9 @@ class DB:
 
             # Create a connection to the SQLite database or create a new one if it doesn't exist
             global conn
-            conn = sqlite3.connect("assets\\misc\\ice-answers.db")
+            open(os.path.join(os.path.abspath("."), "assets", "misc", "ice-answers.db"), "w")
+            open(os.path.join(os.path.abspath("."), "assets", "misc", "keys.pkl"), "w")
+            conn = sqlite3.connect(os.path.join("assets", "misc", "ice-answers.db"))
             # Create a cursor object from the connection to execute SQL commands
             global cursor
             cursor = conn.cursor()
@@ -92,7 +94,7 @@ class DB:
             - ans (dict): A dictionary containing the fetched data from the database. The keys of the dictionary are generated using the combination of the shipper_name and receiver_name values from the database table. The values of the dictionary are dictionaries themselves, containing various attributes related to the shipment.
             """
             # Create a connection to the SQLite database or create a new one if it doesn't exist
-            conn = sqlite3.connect("assets\\misc\\ice-answers.db")
+            conn = sqlite3.connect(os.path.join("assets", "misc", "ice-answers.db"))
 
             # Create a cursor object from the connection to execute SQL commands
             cursor = conn.cursor()
@@ -133,7 +135,7 @@ class DB:
         Deletes the SQLite database and table.
 
         This function establishes a connection to the SQLite database specifiedby the
-        file path "other\\assets\\misc\\ice-answers.db". It then creates a cursor object toexecute
+        file path "other\\os.path.join("assets", "misc", "ice-answers.db")". It then creates a cursor object toexecute
         SQL commands. The function proceeds to drop the table named "answers"from the
         database and commits the changes. Finally, it closes the connection,removes
         the database file, and prints a success message.
@@ -146,7 +148,7 @@ class DB:
         """
 
         # Just delete the DB.
-        os.remove(os.path.abspath("./assets\\misc\\ice-answers.db"))
+        os.remove(os.path.abspath(os.path.join("assets", "misc", "ice-answers.db")))
         print("SQLite Database and Table Deleted Successfully")
 
 
@@ -157,20 +159,20 @@ class DB:
         :param None::return: None
                 """
         # Create a connection to the SQLite database
-        conn = sqlite3.connect("assets\\misc\\ice-answers.db")
+        conn = sqlite3.connect(os.path.join("assets", "misc", "ice-answers.db"))
         conn.close()
-    
+
 
 class Consignment:
     def load_last_consign_key():
         """
-        Load the last consign key from the "assets\\misc\\keys.pkl" file.
+        Load the last consign key from the "os.path.join("assets", "misc", "keys.pkl")" file.
 
         Returns:
             int: The last consign key. If the file is empty or does not exist, returns 0.
         """
         try:
-            with open(file="assets\\misc\\keys.pkl", mode="rb") as file:
+            with open(file=os.path.join("assets", "misc", "keys.pkl"), mode="rb") as file:
                 last_key = pickle.load(file)
         except EOFError:
             last_key = 0
@@ -188,7 +190,7 @@ class Consignment:
                 None
             """
 
-            with open(file="assets\\misc\\keys.pkl", mode="wb") as file:
+            with open(file=os.path.join("assets", "misc", "keys.pkl"), mode="wb") as file:
                 pickle.dump(last_key, file)
 
     def generate_consign_key():
@@ -282,7 +284,7 @@ class Window:
             return False
         else:
             return True
-    
+
 class Menu:
     def toggle_menu(sidebar, window):
         """
@@ -381,7 +383,40 @@ class Answer:
             print("Error: Shipper-Receiver combination not found in the dictionary.")
             print("Detailed Error:", str(e))
             pass
-    
+
+    async def send_push_message():
+        """
+        Asynchronous function to send a message using a POST request with JSON data and headers.
+        If the response status code is 200, it shows a success message; otherwise, it shows an error message.
+        """
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer 7A770E61F964B0D25F15CB9470F250EEFF9486967B17E7CF636C25E1ED1E122E",
+        }
+
+        json_data = {
+            "interests": ["ICEPOS"],
+            "web": {"notification": {"title": "Shipment Booked!", "body": "Hello Kamran Baig, A new shipment has been booked."}},
+        }
+
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "https://bd6732cb-f1df-40a9-bf10-1b39a5beeb90.pushnotifications.pusher.com/publish_api/v1/instances/bd6732cb-f1df-40a9-bf10-1b39a5beeb90/publishes",
+                headers=headers,
+                json=json_data,
+            )
+
+            if response.status_code == 200:
+                CustomMessagebox.showsuccess(
+                    "Message Sent",
+                    "A message has been sent to those concerned.",
+                )
+            else:
+                CustomMessagebox.showerror(
+                    "Error Sending Message",
+                    f"Technical Error: '{response.text}'."
+                )
+
     # Function to update the dropdown and text widget when the Refresh button is clicked
     def refresh_dropdown_and_text(answer_dropdown):
         """
@@ -398,7 +433,7 @@ class Answer:
             # Fetch data from the database
             # Create a connection to the SQLite database or create a new one if it doesn't exist
             global conn
-            conn = sqlite3.connect("assets\\misc\\ice-answers.db")
+            conn = sqlite3.connect(os.path.join("assets", "misc", "ice-answers.db"))
             # Create a cursor object from the connection to execute SQL commands
             global cursor
             cursor = conn.cursor() 
@@ -464,7 +499,7 @@ class Answer:
         else:
             # Create a connection to the SQLite database or create a new one if it doesn't exist
             global conn
-            conn = sqlite3.connect("assets\\misc\\ice-answers.db")
+            conn = sqlite3.connect(os.path.join("assets", "misc", "ice-answers.db"))
             # Create a cursor object from the connection to execute SQL commands
             global cursor
             cursor = conn.cursor() 
@@ -499,6 +534,7 @@ class Answer:
             # Refresh the dropdown and display the updated data in the Text widget
             Answer.refresh_dropdown_and_text(answer_dropdown)
             CustomMessagebox.showsuccess("Information Submitted", "The Information has been Added to ICEPOS records.")
+            asyncio.run(Answer.send_push_message())
 
     def create_formatted_image(
     ship_name,
@@ -519,9 +555,9 @@ class Answer:
     rec_contact,
     serial_no,
 ):
-    
+
         # Load the background image
-        
+
         background_img = Image.open(os.path.join("assets", "images", "airway_bill_for_printing.png"))
         print("Inside create_formatted_image function...")
 
@@ -574,7 +610,7 @@ class Answer:
         )
         print("text drawn")
         # Save the formatted image
-        
+
         background_img.save(f"{current_date}.png")
 
         # Show a message box indicating the image creation

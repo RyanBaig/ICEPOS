@@ -2,7 +2,7 @@ Pillow
 pyautogui
 screeninfo
 ttkbootstrap
-requests
+httpx
 CTkMessageBox
 customtkinter
 packaging
