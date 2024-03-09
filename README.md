@@ -1,6 +1,6 @@
 #
 
-[![Release](https://badgers.space/github/release/RyanBaig/ICEPOS)](https://github.com/RyanGamingYT/ICEPOS/releases/tag/v1.4)
+[![Release](https://badgers.space/github/release/RyanBaig/ICEPOS)](https://github.com/RyanBaig/ICEPOS/releases/tag/v1.4)
 ![Checks](https://badgers.space//github/checks/RyanBaig/ICEPOS)
 [![License](https://badgers.space//github/license/RyanBaig/ICEPOS)](LICENSE.txt)
 ![Issues](https://badgers.space/github/open-issues/RyanBaig/ICEPOS)
@@ -25,7 +25,7 @@ interface for data submission, retrieval, and printing, along with a custom iden
 - Clone this repo using the following:
 
 ```bash
-git clone https://github.com/RyanGamingYT/ICEPOS
+git clone https://github.com/RyanBaig/ICEPOS
 ```
 
 - Navigate to the project directory using:
@@ -75,29 +75,28 @@ cd ICEPOS
 - CustomTkinter: Used for styling the application.
 - CTkMessagebox: Extension Pack for custom Messageboxes for CustomTkinter.
 
-
 ## Screenshots
 
 #### Submission Tab (Sidebar Closed)
 
-- ![Submission Tab (Sidebar Closed)](screenshots/Submission%20Tab%20(Sidebar%20Closed).JPG)
+- ![Submission Tab (Sidebar Closed)](<screenshots/Submission%20Tab%20(Sidebar%20Closed).JPG>)
 
 #### Submission Tab (Sidebar Open)
 
-- ![Submission Tab (Sidebar Open)](screenshots/Submission%20Tab%20(Sidebar%20Open).JPG)
+- ![Submission Tab (Sidebar Open)](<screenshots/Submission%20Tab%20(Sidebar%20Open).JPG>)
 
 #### Answers Tab (No Answer Selected)
 
-- ![Answers Tab (No Answer Selected)](screenshots/Answers%20Tab%20(No%20Answer%20Selected).JPG)
+- ![Answers Tab (No Answer Selected)](<screenshots/Answers%20Tab%20(No%20Answer%20Selected).JPG>)
 
 #### Answers Tab (Sample Answer Selected)
 
-- ![Answers Tab (Sample Answer Selected)](screenshots/Answers%20Tab%20(Sample%20Answer%20Selected).JPG)
+- ![Answers Tab (Sample Answer Selected)](<screenshots/Answers%20Tab%20(Sample%20Answer%20Selected).JPG>)
 
 #### Tracking Tab (No Tracking Number Added)
 
-- ![Tracking Tab (No Tracking Number Added)](screenshots/Tracking%20Tab%20(No%20Tracking%20Number%20Added).JPG)
+- ![Tracking Tab (No Tracking Number Added)](<screenshots/Tracking%20Tab%20(No%20Tracking%20Number%20Added).JPG>)
 
 #### Tracking Tab (Sample UPS Tracking Number Added)
 
-- ![Tracking Tab (Sample UPS Tracking Number Selected)](screenshots/Tracking%20Tab%20(Sample%20UPS%20Tracking%20Number%20Added).JPG)
+- ![Tracking Tab (Sample UPS Tracking Number Selected)](<screenshots/Tracking%20Tab%20(Sample%20UPS%20Tracking%20Number%20Added).JPG>)
