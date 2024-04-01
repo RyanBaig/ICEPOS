@@ -1,6 +1,7 @@
 import datetime
 import os
 import sqlite3
+import sys
 import threading
 import tkinter as tk
 
@@ -22,10 +23,6 @@ if not os.path.exists(os.path.abspath(os.path.join("assets", "misc", "ice-answer
 # Functions:
 
 # Function to create a formatted image
-
-
-
-
 
 def generate_airway_bill_with_terms_and_conditions():
     """
@@ -182,6 +179,9 @@ window = ctk.CTk()
 window.title("ICE AIRWAY BILL")
 window.geometry(f"{width}x{height}"
 )
+
+if sys.platform == "win32":
+    window.iconbitmap(os.path.join("assets", "images", "icon.ico"))
 
 
 
