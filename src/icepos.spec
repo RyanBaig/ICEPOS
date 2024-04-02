@@ -2,10 +2,10 @@
 
 
 a = Analysis(
-    ['./src/icepos.py'],
+    ['./icepos.py'],
     pathex=[],
     binaries=[],
-    datas=[('./src/assets', 'assets/'), ('./src/custom_widgets.py', '.'), ('./src/functions.py', '.')],
+    datas=[('./assets', 'assets/'), ('./custom_widgets.py', '.'), ('./functions.py', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -31,7 +31,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['./src/assets/images/icon.ico'],
+    icon=['./assets/images/icon.ico'],
 )
 coll = COLLECT(
     exe,
