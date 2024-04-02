@@ -16,9 +16,9 @@ jobs:
     - name: PyInstaller Windows
       uses: JackMcKew/pyinstaller-action-windows@main
       with:
-        path: ""
+        path: "src"
 
     - uses: actions/upload-artifact@v2
       with:
         name: ICEPOS
-        path: ""
+        path: "src/dist"
