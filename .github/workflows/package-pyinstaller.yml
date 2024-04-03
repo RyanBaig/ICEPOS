@@ -2,7 +2,7 @@ name: Package Application with Pyinstaller
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
     branches: [ master ]
   workflow_dispatch:
@@ -30,6 +30,6 @@ jobs:
       with:
         name: icepos-exe
         path: src/dist/
-        
+
     - name: Display structure of downloaded files
       run: ls -R your/destination/dir
