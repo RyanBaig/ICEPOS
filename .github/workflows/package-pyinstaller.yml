@@ -1,5 +1,4 @@
 name: Package Application with Pyinstaller
-
 on:
   push:
     branches: [ master ]
@@ -9,27 +8,14 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
-
     - name: Package Application
       uses: JackMcKew/pyinstaller-action-windows@main
       with:
         path: src
-
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v2
       with:
         name: icepos-exe
-
-    
-    - uses: actions/download-artifact@v4
-      with:
-        name: icepos-exe
-        path: src/dist/
-
-    - name: Display structure of downloaded files
-      run: ls -R src/dist
+        path: src/dist/windows
