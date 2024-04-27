@@ -565,7 +565,7 @@ class Answer:
         draw = ImageDraw.Draw(background_img)
 
         # Set the font
-        font = ImageFont.truetype("arial.ttf", 20)
+        font = ImageFont.truetype(os.path.join("assets", "misc", "Arial.ttf"), 20)
 
         # Define the coordinates for placing text on the image
 

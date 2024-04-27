@@ -15,6 +15,7 @@ from functions import DB, Answer, Consignment, Menu, Window
 
 # Get Current Date & Time
 current_date = datetime.datetime.now().strftime("%d-%m-%Y -- %H-%M-%S")
+current_folder_date = datetime.datetime.now().strftime("%d-%m-%Y")
 
 # Create DB
 if not os.path.exists(os.path.abspath(os.path.join("assets", "misc", "ice-answers.db"))):
@@ -70,11 +71,14 @@ def generate_airway_bill_with_terms_and_conditions():
     if not os.path.exists(final_path):
         os.makedirs(final_path)
 
-    print(final_path + f"{current_date}.png")
+    print(final_path + os.path.join(current_folder_date, f"{current_date}.png"))
 
-    combined_image.save(os.path.join(final_path, f"{current_date}.png"))
+    if not os.path.exists(current_folder_date):
+        os.makedirs(os.path.join(final_path, current_folder_date))
 
-    print("saved final " + final_path)
+    combined_image.save(os.path.join(final_path, current_folder_date, f"{current_date}.png"))
+
+    print(f"saved final {final_path}{current_folder_date}/{current_date}.png")
     os.remove(f"{current_date}.png")
 
 def print_formatted_image():
@@ -150,18 +154,16 @@ def print_formatted_image():
         # Print the formatted image
         try:
             generate_airway_bill_with_terms_and_conditions()
-            
+                
             # Format the date as needed
             user = os.path.expanduser('~')
             final_path = os.path.join(user, "Desktop", "Airway-Bills")
             if not os.path.exists(final_path):
                 os.makedirs(final_path)
-	    
-            Answer.print_image(os.path.join(final_path, f"{current_date}.png"))
             
+            Answer.print_image(os.path.join(final_path, os.path.join(current_folder_date, f"{current_date}.png")))
         except Exception as e:
             CustomMessagebox.showerror("Printing Error", str(e))
-
 
 # Get the primary monitor information
 screen_info = screeninfo.get_monitors()[0]
@@ -182,7 +184,6 @@ window.geometry(f"{width}x{height}"
 
 if sys.platform == "win32":
     window.iconbitmap(os.path.join("assets", "images", "icon.ico"))
-
 
 
 # Create a Tab Control
@@ -239,7 +240,6 @@ personal_info_label = ctk.CTkLabel(
     sidebar, text="Personal Information", font=("Arial", 15)
 )
 personal_info_label.pack(pady=2)
-
 
 
 # ------ INPUTS ---------
@@ -497,9 +497,6 @@ def track_package():
     import webbrowser
     
     webbrowser.open(url)
-    
-
-    
 
 
 # Function to initiate tracking in a separate thread
@@ -538,8 +535,6 @@ last_c_key_button = ctk.CTkButton(
 last_c_key_button.pack(side="top", padx=5, pady=5, fill="x")
 
 # last_c_key_button.grid(row=0, column=0, padx=5, pady=5, sticky="w")
-
-
 
 
 # Create a Text widget to display the answers in the Answers tab
