@@ -79,24 +79,24 @@ cd ICEPOS
 
 #### Submission Tab (Sidebar Closed)
 
-- ![Submission Tab (Sidebar Closed)](<assets/screenshots/Submission%20Tab%20(Sidebar%20Closed).JPG>)
+- ![Submission Tab (Sidebar Closed)](<src/assets/screenshots/Submission%20Tab%20(Sidebar%20Closed).JPG>)
 
 #### Submission Tab (Sidebar Open)
 
-- ![Submission Tab (Sidebar Open)](<assets/screenshots/Submission%20Tab%20(Sidebar%20Open).JPG>)
+- ![Submission Tab (Sidebar Open)](<src/assets/screenshots/Submission%20Tab%20(Sidebar%20Open).JPG>)
 
 #### Answers Tab (No Answer Selected)
 
-- ![Answers Tab (No Answer Selected)](<assets/screenshots/Answers%20Tab%20(No%20Answer%20Selected).JPG>)
+- ![Answers Tab (No Answer Selected)](<src/assets/screenshots/Answers%20Tab%20(No%20Answer%20Selected).JPG>)
 
 #### Answers Tab (Sample Answer Selected)
 
-- ![Answers Tab (Sample Answer Selected)](<assets/screenshots/Answers%20Tab%20(Sample%20Answer%20Selected).JPG>)
+- ![Answers Tab (Sample Answer Selected)](<src/assets/screenshots/Answers%20Tab%20(Sample%20Answer%20Selected).JPG>)
 
 #### Tracking Tab (No Tracking Number Added)
 
-- ![Tracking Tab (No Tracking Number Added)](<assets/screenshots/Tracking%20Tab%20(No%20Tracking%20Number%20Added).JPG>)
+- ![Tracking Tab (No Tracking Number Added)](<src/assets/screenshots/Tracking%20Tab%20(No%20Tracking%20Number%20Added).JPG>)
 
 #### Tracking Tab (Sample UPS Tracking Number Added)
 
-- ![Tracking Tab (Sample UPS Tracking Number Selected)](<assets/screenshots/Tracking%20Tab%20(Sample%20UPS%20Tracking%20Number%20Added).JPG>)
+- ![Tracking Tab (Sample UPS Tracking Number Selected)](<src/assets/screenshots/Tracking%20Tab%20(Sample%20UPS%20Tracking%20Number%20Added).JPG>)
