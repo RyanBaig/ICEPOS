@@ -106,25 +106,27 @@ class DB:
             ans = {}
             for row in rows:
                 # Create a key using the combination of shipper_name and receiver_name
-                key = f"{row[0]} - {row[6]}"
+                key = f"{row[0]} - {row[7]}"
                 ans[key] = {
-                    "date": row[13],
-                    "consign_key": row[14],
+                    "date": row[15],
+                    "consign_key": row[16],
                     "------": "-----",
                     "shipper_name": row[0],
-                    "shipper_address": row[1],
-                    "shipper_contact": row[2],
+                    "shipper_address1": row[1],
+                    "shipper_address2": row[2],
+                    "shipper_contact": row[3],
                     "-----": "-----",
-                    "receiver_name": row[6],
-                    "receiver_address": row[7],
-                    "rec_contact": row[8],
-                    "receiver_zipcode": row[9],
+                    "receiver_name": row[7],
+                    "receiver_address1": row[8],
+                    "receiver_address2": row[9],
+                    "rec_contact": row[10],
+                    "receiver_zipcode": row[11],
                     "-------": "-----",
                     "shipment_description": row[3],
-                    "shipment_destination": row[4],
-                    "shipment_service": row[5],
-                    "no_of_pieces": row[12],
-                    "shipment_weight": row[10],
+                    "shipment_destination": row[5],
+                    "shipment_service": row[6],
+                    "no_of_pieces": row[14],
+                    "shipment_weight": row[12],
                     "shipment_charges": row[11]
                 }
             return ans
@@ -227,7 +229,7 @@ class Consignment:
         """
         latest_key = Consignment.load_last_consign_key()
         if latest_key == 0:
-            latest_key = "0000"
+            CustomMessagebox.showinfo("No Last Used Consign Key", "There haven't been any last used consign keys.")
         CustomMessagebox.showinfo("Last Used Consign Key", f"The latest used consign key is ICE-SHIP-{latest_key}.")
 
 class Window:
@@ -280,7 +282,16 @@ class Window:
             name_button.configure(text=str(name))
 
     def character_limit(P):
-        if len(P) > 30:
+        """
+        Check if the length of the input string `P` is greater than 35 characters.
+
+        Parameters:
+            P (str): The input string to be checked.
+
+        Returns:
+            bool: True if the length of `P` is less than or equal to 35, False otherwise.
+        """
+        if len(P) > 35:
             return False
         else:
             return True
@@ -340,50 +351,6 @@ class Menu:
             time.sleep(0.02)  # Adjust this delay to control the animation speed
 
 class Answer:
-    # Function to display the selected answer in the Text widget
-    def display_selected_answer(selected_answer, answer_dropdown, answers_text):
-        """
-        Display the selected answer in the answers_text widget.
-
-        This function updates the dropdown and text with the latest data and then
-        fetches the selected answer data from the dropdown.rows dictionary. If the
-        selected answer data is not found, the function returns without making any
-        changes. Otherwise, it formats and displays all fields of the selected
-        answer in the answers_text widget.
-
-        Parameters:
-        None
-
-        Returns:
-        None
-        """
-        try:
-            # Update the dropdown and text with latest data
-            Answer.refresh_dropdown_and_text(answer_dropdown)
-
-            selected_value = selected_answer.get()
-
-            # Fetch the selected answer data from the dropdown.rows dictionary
-            ans_dict = answer_dropdown.rows.get(selected_value)
-
-            # If the selected answer data is not found, return without making any changes
-            if ans_dict is None:
-                return
-
-            answers_text.configure(state="normal")
-            answers_text.delete(1.0, ctk.END)
-
-            # Format and display all fields of the selected answer
-            for column, value in ans_dict.items():
-                answers_text.insert(ctk.END, f"{column}: {value}\n")
-
-            answers_text.configure(state="disabled")
-            Answer.refresh_dropdown_and_text(answer_dropdown)
-        except KeyError as e:
-            print("Error: Shipper-Receiver combination not found in the dictionary.")
-            print("Detailed Error:", str(e))
-            pass
-
     async def send_push_message():
         """
         Asynchronous function to send a message using a POST request with JSON data and headers.
@@ -417,6 +384,52 @@ class Answer:
                     f"Technical Error: '{response.text}'."
                 )
 
+    # Function to display the selected answer in the Text widget
+    def display_selected_answer(selected_answer, answer_dropdown, answers_text):
+        """
+        Display the selected answer in the Text widget.
+
+        Args:
+            selected_answer (tkinter.StringVar): The variable that holds the selected answer.
+            answer_dropdown (ctk.CTkOptionMenu): The dropdown menu widget that displays the answers.
+            answers_text (ctk.CTkText): The Text widget that displays the selected answer.
+
+        Returns:
+            None
+
+        Raises:
+            KeyError: If the selected answer combination is not found in the dictionary.
+
+        This function is called when the "Display Answer" button is clicked. It updates the dropdown menu and text widget with the latest data. It retrieves the selected value from the `selected_answer` variable and retrieves the corresponding answer dictionary from the `answer_dropdown` widget. If the answer dictionary is not found, it prints a message and returns. Otherwise, it configures the `answers_text` widget to be editable, deletes its contents, and inserts the selected answer information. Finally, it configures the `answers_text` widget to be disabled and updates the dropdown menu and text widget with the latest data.
+        """
+        
+        try:
+            # Update the dropdown and text with latest data
+            Answer.refresh_dropdown_and_text(answer_dropdown)
+
+            selected_value = selected_answer.get()
+
+
+            ans_dict = answer_dropdown.rows.get(selected_value)
+
+
+
+            if ans_dict is None:
+                print("Selected answer data not found")
+                return
+
+            answers_text.configure(state="normal")
+            answers_text.delete(1.0, ctk.END)
+
+            for column, value in ans_dict.items():
+                answers_text.insert(ctk.END, f"{column}: {value}\n")
+
+            answers_text.configure(state="disabled")
+            Answer.refresh_dropdown_and_text(answer_dropdown)
+        except KeyError as e:
+            print("Error: Shipper-Receiver combination not found in the dictionary.")
+            print("Detailed Error:", str(e))
+
     # Function to update the dropdown and text widget when the Refresh button is clicked
     def refresh_dropdown_and_text(answer_dropdown):
         """
@@ -449,29 +462,33 @@ class Answer:
             ans_dict = {}
 
             for row in rows:
+
                 shipper_name = row[0]
-                receiver_name = row[6]
+                receiver_name = row[7]
                 if shipper_name and receiver_name:
                     shipper_receiver_name = f"{shipper_name} - {receiver_name}"
                     valid_shipper_receiver_names.append(shipper_receiver_name)
+
                     ans_dict[shipper_receiver_name] = {
-                        "Date": row[13],
-                        "Consignment Key": row[14],
+                        "Date": row[15],
+                        "Consignment Key": row[16],
                         "-----": "-----",
                         "Shipper Name": shipper_name,
-                        "Shipper Address": row[1],
-                        "Shipper Contact Number": row[2],
+                        "Shipper Address (1)": row[1],
+                        "Shipper Address (2)": row[2],
+                        "Shipper Contact Number": row[3],
                         "------": "-----",
                         "Receiver Name": receiver_name,
-                        "Receiver Address": row[7],
-                        "Receiver Contact Number": row[8],
-                        "Receiver Zipcode": row[9],
+                        "Receiver Address (1)": row[8],
+                        "Receiver Address (2)": row[9],
+                        "Receiver Contact Number": row[10],
+                        "Receiver Zipcode": row[11],
                         "-------": "-----",
                         "Shipment Description": row[3],
-                        "Shipment Destination": row[4],
-                        "Shipment Service": row[5],
-                        "Number of Pieces": row[12],
-                        "Shipment Weight": row[10],
+                        "Shipment Destination": row[5],
+                        "Shipment Service": row[6],
+                        "Number of Pieces": row[14],
+                        "Shipment Weight": row[12],
                         "Shipment Charges": row[11],
                     }
 
@@ -480,7 +497,7 @@ class Answer:
 
         except Exception as error:
             print(f"Error in refresh_dropdown_and_text: {str(error)}")
-            pass
+            
 
     def submit(entries: list, answer_dropdown):
         """
@@ -511,19 +528,19 @@ class Answer:
                     shipper_name,
                     shipper_address1,
                     shipper_address2,
-                    shipper_contact,
                     shipment_description,
                     shipment_destination,
                     shipment_service,
                     receiver_name,
                     receiver_address1,
                     receiver_address2,
-                    rec_contact,
                     receiver_zipcode,
                     weight,
                     charges,
                     no_of_pieces,
                     date,
+                    shipper_contact,
+                    rec_contact,
                     consign_identifier
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,

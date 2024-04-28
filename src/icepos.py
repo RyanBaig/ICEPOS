@@ -618,7 +618,7 @@ display_button.pack(padx=10, pady=1)
 # Create a button to refresh
 refresh_button = ctk.CTkButton(
     tab_control.tab("Answers"), text="Refresh")
-refresh_button.configure(command=Answer.refresh_dropdown_and_text(answer_dropdown))
+refresh_button.configure(command=update_dropdown_with_data())
 refresh_button.pack()
 
 # Bind the F11 key to toggle fullscreen
