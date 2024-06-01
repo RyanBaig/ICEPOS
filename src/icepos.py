@@ -71,14 +71,14 @@ def generate_airway_bill_with_terms_and_conditions():
     if not os.path.exists(final_path):
         os.makedirs(final_path)
 
-    print(final_path + os.path.join(current_folder_date, f"{current_date}.png"))
 
-    if not os.path.exists(current_folder_date):
+
+    if not os.path.exists(os.path.join(final_path, current_folder_date)):
         os.makedirs(os.path.join(final_path, current_folder_date))
 
     combined_image.save(os.path.join(final_path, current_folder_date, f"{current_date}.png"))
 
-    print(f"saved final {final_path}{current_folder_date}/{current_date}.png")
+    print(f"saved final {final_path}/{current_folder_date}/{current_date}.png")
     os.remove(f"{current_date}.png")
 
 def print_formatted_image():
@@ -152,18 +152,19 @@ def print_formatted_image():
         )
 
         # Print the formatted image
-        try:
-            generate_airway_bill_with_terms_and_conditions()
+        # try:
+        generate_airway_bill_with_terms_and_conditions()
                 
-            # Format the date as needed
-            user = os.path.expanduser('~')
-            final_path = os.path.join(user, "Desktop", "Airway-Bills")
-            if not os.path.exists(final_path):
-                os.makedirs(final_path)
+        # Format the date as needed
+        user = os.path.expanduser('~')
+        final_path = os.path.join(user, "Desktop", "Airway-Bills")
+
+        if not os.path.exists(final_path):
+            os.makedirs(final_path)
             
-            Answer.print_image(os.path.join(final_path, os.path.join(current_folder_date, f"{current_date}.png")))
-        except Exception as e:
-            CustomMessagebox.showerror("Printing Error", str(e))
+        Answer.print_image(os.path.join(final_path, os.path.join(current_folder_date, f"{current_date}.png")))
+        # except Exception as e:
+        #     CustomMessagebox.showerror("Printing Error", str(e))
 
 # Get the primary monitor information
 screen_info = screeninfo.get_monitors()[0]
